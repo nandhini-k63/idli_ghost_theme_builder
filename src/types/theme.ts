@@ -3,6 +3,7 @@ export interface ThemeMetadata {
   version: string;
   author: string;
   description?: string;
+  themeId?: string;
 }
 
 export interface DesignTokens {
@@ -32,6 +33,7 @@ export interface ThemeSettings {
   containerWidth: number;
   fontFamily: string;
   primaryColor: string;
+  accentColor?: string;
   designTokens: DesignTokens;
 }
 
@@ -44,6 +46,7 @@ export interface ResponsiveStyleValue<T> {
 export interface BuilderBlock {
   id: string;
   type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props: Record<string, any>;
   styles: {
     paddingTop?: ResponsiveStyleValue<string> | string;
@@ -53,6 +56,7 @@ export interface BuilderBlock {
     textAlign?: ResponsiveStyleValue<'left' | 'center' | 'right'> | string;
     backgroundColor?: string;
     textColor?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
   // Supporting nested children blocks (e.g. Columns holding Column containers)
@@ -74,10 +78,17 @@ export interface ThemePages {
   [key: string]: PageDefinition;
 }
 
+export interface ThemeLayouts {
+  header: string | null;
+  footer: string | null;
+}
+
 export interface ThemeDocument {
   metadata: ThemeMetadata;
   settings: ThemeSettings;
   pages: ThemePages;
+  layouts: ThemeLayouts;
   // A flat dictionary of all blocks on the canvas to make reordering and manipulation simple
   blocks: Record<string, BuilderBlock>;
+  assets?: Record<string, string>; // Maps asset:// URI to base64 Data URI
 }

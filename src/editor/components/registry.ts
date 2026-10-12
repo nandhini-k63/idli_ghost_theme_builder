@@ -69,30 +69,20 @@ import * as tagArchiveCanvas from "./tag-archive/canvas";
 import * as tagArchiveSidebar from "./tag-archive/sidebar";
 import * as tagArchiveCompiler from "./tag-archive/compiler";
 
-import * as accordion from "./accordion/schema";
-import * as accordionCanvas from "./accordion/canvas";
-import * as accordionSidebar from "./accordion/sidebar";
-import * as accordionCompiler from "./accordion/compiler";
+import * as faq from "./faq/schema";
+import * as faqCanvas from "./faq/canvas";
+import * as faqSidebar from "./faq/sidebar";
+import * as faqCompiler from "./faq/compiler";
 
 import * as testimonials from "./testimonials/schema";
 import * as testimonialsCanvas from "./testimonials/canvas";
 import * as testimonialsSidebar from "./testimonials/sidebar";
 import * as testimonialsCompiler from "./testimonials/compiler";
 
-import * as pricingTable from "./pricing-table/schema";
-import * as pricingTableCanvas from "./pricing-table/canvas";
-import * as pricingTableSidebar from "./pricing-table/sidebar";
-import * as pricingTableCompiler from "./pricing-table/compiler";
-
 import * as gridGallery from "./grid-gallery/schema";
 import * as gridGalleryCanvas from "./grid-gallery/canvas";
 import * as gridGallerySidebar from "./grid-gallery/sidebar";
 import * as gridGalleryCompiler from "./grid-gallery/compiler";
-
-import * as socialLinks from "./social-links/schema";
-import * as socialLinksCanvas from "./social-links/canvas";
-import * as socialLinksSidebar from "./social-links/sidebar";
-import * as socialLinksCompiler from "./social-links/compiler";
 
 import * as videoPlayer from "./video-player/schema";
 import * as videoPlayerCanvas from "./video-player/canvas";
@@ -129,6 +119,51 @@ import * as errorViewCanvas from "./error-view/canvas";
 import * as errorViewSidebar from "./error-view/sidebar";
 import * as errorViewCompiler from "./error-view/compiler";
 
+import * as logoCloud from "./logo-cloud/schema";
+import * as logoCloudCanvas from "./logo-cloud/canvas";
+import * as logoCloudSidebar from "./logo-cloud/sidebar";
+import * as logoCloudCompiler from "./logo-cloud/compiler";
+
+import * as stats from "./stats/schema";
+import * as statsCanvas from "./stats/canvas";
+import * as statsSidebar from "./stats/sidebar";
+import * as statsCompiler from "./stats/compiler";
+
+import * as team from "./team/schema";
+import * as teamCanvas from "./team/canvas";
+import * as teamSidebar from "./team/sidebar";
+import * as teamCompiler from "./team/compiler";
+
+import * as share from "./share/schema";
+import * as shareCanvas from "./share/canvas";
+import * as shareSidebar from "./share/sidebar";
+import * as shareCompiler from "./share/compiler";
+
+import * as comments from "./comments/schema";
+import * as commentsCanvas from "./comments/canvas";
+import * as commentsSidebar from "./comments/sidebar";
+import * as commentsCompiler from "./comments/compiler";
+
+import * as relatedPosts from "./related-posts/schema";
+import * as relatedPostsCanvas from "./related-posts/canvas";
+import * as relatedPostsSidebar from "./related-posts/sidebar";
+import * as relatedPostsCompiler from "./related-posts/compiler";
+
+import * as postNavigation from "./post-navigation/schema";
+import * as postNavigationCanvas from "./post-navigation/canvas";
+import * as postNavigationSidebar from "./post-navigation/sidebar";
+import * as postNavigationCompiler from "./post-navigation/compiler";
+
+import * as tagHeader from "./tag-header/schema";
+import * as tagHeaderCanvas from "./tag-header/canvas";
+import * as tagHeaderSidebar from "./tag-header/sidebar";
+import * as tagHeaderCompiler from "./tag-header/compiler";
+
+import * as cards from "./cards/schema";
+import * as cardsCanvas from "./cards/canvas";
+import * as cardsSidebar from "./cards/sidebar";
+import * as cardsCompiler from "./cards/compiler";
+
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -144,11 +179,10 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "featured-posts": { type: "featured-posts", ...featuredPosts, ...featuredPostsCanvas, ...featuredPostsSidebar, ...featuredPostsCompiler },
   "author-profile": { type: "author-profile", ...authorProfile, ...authorProfileCanvas, ...authorProfileSidebar, ...authorProfileCompiler },
   "tag-archive": { type: "tag-archive", ...tagArchive, ...tagArchiveCanvas, ...tagArchiveSidebar, ...tagArchiveCompiler },
-  accordion: { type: "accordion", ...accordion, ...accordionCanvas, ...accordionSidebar, ...accordionCompiler },
+  "tag-header": { type: "tag-header", ...tagHeader, ...tagHeaderCanvas, ...tagHeaderSidebar, ...tagHeaderCompiler },
+  faq: { type: "faq", ...faq, ...faqCanvas, ...faqSidebar, ...faqCompiler },
   testimonials: { type: "testimonials", ...testimonials, ...testimonialsCanvas, ...testimonialsSidebar, ...testimonialsCompiler },
-  "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },
   "grid-gallery": { type: "grid-gallery", ...gridGallery, ...gridGalleryCanvas, ...gridGallerySidebar, ...gridGalleryCompiler },
-  "social-links": { type: "social-links", ...socialLinks, ...socialLinksCanvas, ...socialLinksSidebar, ...socialLinksCompiler },
   "video-player": { type: "video-player", ...videoPlayer, ...videoPlayerCanvas, ...videoPlayerSidebar, ...videoPlayerCompiler },
   "post-grid": { type: "post-grid", ...postGrid, ...postGridCanvas, ...postGridSidebar, ...postGridCompiler },
   header: { type: "header", ...header, ...headerCanvas, ...headerSidebar, ...headerCompiler },
@@ -156,4 +190,12 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "post-content": { type: "post-content", ...postContent, ...postContentCanvas, ...postContentSidebar, ...postContentCompiler },
   "page-detail": { type: "page-detail", ...pageDetail, ...pageDetailCanvas, ...pageDetailSidebar, ...pageDetailCompiler },
   "error-view": { type: "error-view", ...errorView, ...errorViewCanvas, ...errorViewSidebar, ...errorViewCompiler },
+  "logo-cloud": { type: "logo-cloud", ...logoCloud, ...logoCloudCanvas, ...logoCloudSidebar, ...logoCloudCompiler },
+  stats: { type: "stats", ...stats, ...statsCanvas, ...statsSidebar, ...statsCompiler },
+  team: { type: "team", ...team, ...teamCanvas, ...teamSidebar, ...teamCompiler },
+  share: { type: "share", ...share, ...shareCanvas, ...shareSidebar, ...shareCompiler },
+  comments: { type: "comments", ...comments, ...commentsCanvas, ...commentsSidebar, ...commentsCompiler },
+  "related-posts": { type: "related-posts", ...relatedPosts, ...relatedPostsCanvas, ...relatedPostsSidebar, ...relatedPostsCompiler },
+  "post-navigation": { type: "post-navigation", ...postNavigation, ...postNavigationCanvas, ...postNavigationSidebar, ...postNavigationCompiler },
+  cards: { type: "cards", ...cards, ...cardsCanvas, ...cardsSidebar, ...cardsCompiler },
 };

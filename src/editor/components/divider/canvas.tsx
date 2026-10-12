@@ -1,12 +1,46 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
 
-export const CanvasElement = ({ block, isSelected, onClick, onDelete, renderChildren }: {
+export const CanvasElement = ({
+  block,
+}: {
   block: BuilderBlock;
-  isSelected: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  onDelete: (e: React.MouseEvent) => void;
-  renderChildren: () => React.ReactNode;
+  isSelected?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  onDelete?: (e: React.MouseEvent) => void;
+  renderChildren?: () => React.ReactNode;
 }) => {
-  return <hr className="border-t border-brand-hairline w-full" />;
+  const isDark = useCanvasDarkMode();
+
+  const lineStyle = (block.props?.style as string) || "solid";
+  const thickness = (block.props?.thickness as string) || "1px";
+  const width = (block.props?.width as string) || "100%";
+  const alignment = (block.props?.alignment as string) || "center";
+  const margin = (block.props?.margin as string) || "32px";
+  const defaultHairline = isDark ? "#333333" : "var(--color-hairline, #ebebeb)";
+  const color = (block.props?.color as string) || defaultHairline;
+
+  const justify =
+    alignment === "left"
+      ? "justify-start"
+      : alignment === "right"
+      ? "justify-end"
+      : "justify-center";
+
+  return (
+    <div className={`w-full flex ${justify} py-1 items-center`}>
+      <hr
+        className="transition-all"
+        style={{
+          border: "none",
+          borderTop: `${thickness} ${lineStyle} ${color}`,
+          width,
+          marginTop: margin,
+          marginBottom: margin,
+          boxSizing: "border-box",
+        }}
+      />
+    </div>
+  );
 };

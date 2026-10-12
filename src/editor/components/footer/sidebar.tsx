@@ -1,20 +1,335 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
+import { ALL_SOCIAL_PLATFORMS, DEFAULT_SOCIAL_PLATFORMS, SocialPlatform } from "./socialIcons";
+import { BackgroundControls } from "../shared/BackgroundControls";
 
-export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
-  block: BuilderBlock;
-  onChangeProps: (props: Record<string, any>) => void;
-  onChangeStyles: (styles: Record<string, any>) => void;
-}) => {
+const Switch = ({ checked, onChange }: { checked: boolean, onChange: (c: boolean) => void }) => (
+  <button 
+    type="button"
+    onClick={() => onChange(!checked)}
+    className={`w-8 h-4.5 flex items-center shrink-0 rounded-full p-0.5 transition-colors ${checked ? 'bg-blue-500' : 'bg-gray-200'}`}
+  >
+    <div className={`w-3.5 h-3.5 bg-white rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-3.5' : 'translate-x-0'}`} />
+  </button>
+);
+const ColorPicker = ({ label, value, onChange, defaultTokenLabel = "Theme Default" }: { label: string, value: string, onChange: (v: string) => void, defaultTokenLabel?: string }) => {
+  const isCustom = !!value;
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[11px] font-sans font-semibold text-brand-body">Copyright Info</label>
-      <input
-        type="text"
-        value={block.props.copyright || ""}
-        onChange={(e) => onChangeProps({ copyright: e.target.value })}
-        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-      />
+    <div className="flex items-center justify-between gap-3 bg-white p-2 border-b border-gray-100 last:border-b-0">
+      <div className="flex flex-col">
+        <span className="text-[12px] font-medium text-gray-800">{label}</span>
+        <label className="flex items-center gap-1.5 mt-1 cursor-pointer">
+          <input 
+            type="checkbox" 
+            checked={isCustom} 
+            onChange={(e) => {
+              if (e.target.checked) onChange("#000000");
+              else onChange("");
+            }}
+            className="rounded-xs border-gray-300 w-3 h-3 accent-brand-primary"
+          />
+          <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Custom</span>
+        </label>
+      </div>
+      {isCustom ? (
+        <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded px-1.5 py-1">
+          <input 
+            type="color" 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)}
+            className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+          />
+          <input 
+            type="text" 
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-14 text-[10px] font-mono text-gray-600 bg-transparent outline-none uppercase"
+          />
+        </div>
+      ) : (
+        <div className="text-[10px] font-mono text-brand-primary bg-brand-primary/10 px-2 py-1 rounded font-semibold tracking-tight">
+          {defaultTokenLabel}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export function SidebarElement({ block, onChangeProps, onChangeStyles }: {
+  block: BuilderBlock;
+  onChangeProps: (props: Record<string, unknown>) => void;
+  onChangeStyles?: (styles: Record<string, unknown>) => void;
+}) {
+  const p = block.props;
+
+  const updateNestedProp = (category: string, key: string, value: unknown) => {
+    onChangeProps({
+      [category]: {
+        ...(p[category] || {}),
+        [key]: value
+      }
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* General Settings */}
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">General</span>
+        
+        <label className="text-[11px] font-sans font-semibold text-brand-body">Layout Style</label>
+        <select
+          value={p.general?.layoutStyle || "Simple Minimal"}
+          onChange={(e) => updateNestedProp("general", "layoutStyle", e.target.value)}
+          className="w-full px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+        >
+          <option value="Simple Minimal">Simple Minimal</option>
+          <option value="Multi-Column">Multi-Column</option>
+          <option value="Newsletter Integrated">Newsletter Integrated</option>
+        </select>
+
+        <div className="flex items-center gap-2 mt-2">
+          <input type="checkbox" checked={p.general?.showSecondaryNav ?? true} onChange={(e) => updateNestedProp("general", "showSecondaryNav", e.target.checked)} />
+          <label className="text-[11px] font-sans text-brand-body">Show Secondary Nav</label>
+        </div>
+
+        {(p.general?.showSecondaryNav ?? true) && (
+          <div className="flex flex-col gap-2 pl-3 border-l-2 border-brand-hairline ml-1 my-1">
+            {p.general?.layoutStyle === "Multi-Column" && (
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-semibold text-gray-500">Column Title</label>
+                <input
+                  type="text"
+                  value={p.general?.secondaryNavTitle ?? "More"}
+                  onChange={(e) => updateNestedProp("general", "secondaryNavTitle", e.target.value)}
+                  className="w-full px-2 py-1 border border-brand-hairline rounded-sm text-xs focus:outline-none bg-brand-canvas-soft"
+                  placeholder="e.g. More, Legal, Links"
+                />
+              </div>
+            )}
+            <div className="bg-gray-50 border border-gray-200/80 rounded p-2 text-[10px] text-gray-600 leading-snug">
+              <span className="font-semibold text-gray-800 block mb-0.5">Static Menu (Default)</span>
+              Displays default static links (<span className="font-medium text-gray-700">Privacy Policy, Terms of Service, Contact</span>). In Ghost, dynamic links are configured via <span className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded">Settings → Navigation</span>.
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 mt-1">
+          <input 
+            type="checkbox" 
+            checked={p.general?.showSocialIcons ?? true} 
+            onChange={(e) => updateNestedProp("general", "showSocialIcons", e.target.checked)} 
+          />
+          <label className="text-[11px] font-sans text-brand-body">Show Social Icons</label>
+        </div>
+
+        {(p.general?.showSocialIcons ?? true) && (
+          <div className="flex flex-col gap-2 pl-3 border-l-2 border-brand-hairline ml-1 my-1">
+            <div className="bg-gray-50 border border-gray-200/80 rounded p-2 text-[10px] text-gray-600 leading-snug">
+              <span className="font-semibold text-gray-800 block mb-0.5">Social Accounts</span>
+              Facebook and X automatically link to your Ghost site settings (<span className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded">@site.facebook</span> and <span className="font-mono text-[9px] bg-gray-100 px-1 py-0.5 rounded">@site.twitter</span>). You can also set custom URLs below.
+            </div>
+
+            <div className="flex items-center justify-between mt-1 mb-0.5">
+              <span className="text-[10px] font-semibold text-gray-700">Included Platforms</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateNestedProp("general", "socialPlatforms", ALL_SOCIAL_PLATFORMS.map(p => p.id))}
+                  className="text-[9px] text-brand-primary hover:underline font-semibold"
+                >
+                  All
+                </button>
+                <span className="text-gray-300 text-[10px]">|</span>
+                <button
+                  type="button"
+                  onClick={() => updateNestedProp("general", "socialPlatforms", DEFAULT_SOCIAL_PLATFORMS)}
+                  className="text-[9px] text-gray-500 hover:underline font-medium"
+                >
+                  Default
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-1 max-h-56 overflow-y-auto pr-1">
+              {ALL_SOCIAL_PLATFORMS.map((platform) => {
+                const activePlatforms: SocialPlatform[] = p.general?.socialPlatforms || DEFAULT_SOCIAL_PLATFORMS;
+                const isChecked = activePlatforms.includes(platform.id);
+                const socialUrls = (p.general?.socialUrls || {}) as Record<string, string>;
+                return (
+                  <div key={platform.id} className="flex flex-col">
+                    <label 
+                      className={`flex items-center justify-between px-2 py-1.5 rounded text-[11px] cursor-pointer transition-colors ${
+                        isChecked ? 'bg-white border border-gray-200 text-gray-800 shadow-2xs' : 'hover:bg-gray-100/70 text-gray-500 border border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4 flex items-center justify-center text-gray-600">
+                          {platform.renderIcon({ size: 14 })}
+                        </span>
+                        <span className="font-medium text-[11px]">{platform.label}</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          let updated: SocialPlatform[];
+                          if (e.target.checked) {
+                            updated = [...activePlatforms, platform.id];
+                          } else {
+                            updated = activePlatforms.filter(id => id !== platform.id);
+                          }
+                          updateNestedProp("general", "socialPlatforms", updated);
+                        }}
+                        className="rounded-xs border-gray-300 w-3.5 h-3.5 accent-brand-primary cursor-pointer"
+                      />
+                    </label>
+                    {isChecked && (
+                      <div className="px-2 py-1">
+                        <input
+                          type="url"
+                          placeholder={platform.id === "facebook" || platform.id === "twitter" ? "Custom URL (defaults to Ghost settings)" : `https://${platform.id}.com/...`}
+                          value={socialUrls[platform.id] || ""}
+                          onChange={(e) => {
+                            updateNestedProp("general", "socialUrls", {
+                              ...socialUrls,
+                              [platform.id]: e.target.value
+                            });
+                          }}
+                          className="w-full px-2 py-1 border border-brand-hairline rounded-xs text-[10px] bg-white text-brand-ink focus:outline-none placeholder:text-gray-400"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 mt-1">
+          <input type="checkbox" checked={p.general?.showCopyright ?? true} onChange={(e) => updateNestedProp("general", "showCopyright", e.target.checked)} />
+          <label className="text-[11px] font-sans text-brand-body">Show Copyright</label>
+        </div>
+
+        {(p.general?.showCopyright ?? true) && (
+          <div className="mt-2">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Custom Copyright</label>
+            <input
+              type="text"
+              placeholder="Leave blank for default"
+              value={p.general?.customCopyrightText || ""}
+              onChange={(e) => updateNestedProp("general", "customCopyrightText", e.target.value)}
+              className="w-full mt-1 px-2 py-1 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Colors & Layout */}
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">Appearance</span>
+        
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-[12px] font-bold text-gray-900 tracking-tight">Colors</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-medium text-gray-500">Sync with Header</span>
+            <Switch 
+              checked={p.colors?.syncWithHeader || false} 
+              onChange={(v) => updateNestedProp("colors", "syncWithHeader", v)} 
+            />
+          </div>
+        </div>
+        
+        {!p.colors?.syncWithHeader && (
+          <>
+            <BackgroundControls
+              styles={block.styles}
+              appearance={{ backgroundColor: p.colors?.backgroundColor }}
+              onChangeStyles={(s) => onChangeStyles && onChangeStyles(s)}
+              updateAppearance={(k, v) => updateNestedProp("colors", k, v)}
+            />
+
+            <div className="flex flex-col gap-3 border-t border-gray-100 mt-5 pt-3">
+              <span className="text-[12px] font-bold text-gray-900 tracking-tight">Colors</span>
+              <div className="flex flex-col rounded-md border border-gray-200 overflow-hidden shadow-sm">
+                <ColorPicker label="Text Color" value={p.colors?.textColor || ""} onChange={(v) => updateNestedProp("colors", "textColor", v)} />
+                {p.general?.showSubscribeBox && (
+                  <>
+                    <ColorPicker label="Button Base" value={p.colors?.buttonBgColor || ""} onChange={(v) => updateNestedProp("colors", "buttonBgColor", v)} />
+                    <ColorPicker label="Button Text" value={p.colors?.buttonTextColor || ""} onChange={(v) => updateNestedProp("colors", "buttonTextColor", v)} />
+                  </>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+        
+        <label className="text-[11px] font-sans font-semibold text-brand-body mt-3">Section Width</label>
+        <select
+          value={p.layout?.sectionWidth || "full"}
+          onChange={(e) => updateNestedProp("layout", "sectionWidth", e.target.value)}
+          className="w-full px-2 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+        >
+          <option value="full">Full Width</option>
+          <option value="wide">Wide (1280px)</option>
+          <option value="standard">Standard (1152px)</option>
+          <option value="narrow">Narrow (896px)</option>
+        </select>
+      </div>
+
+      {/* Spacing */}
+      <div className="flex flex-col gap-3 border-t border-brand-hairline pt-3">
+        <span className="text-[10px] uppercase font-bold text-brand-ink mb-1 border-b border-brand-hairline pb-1">Spacing</span>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Top Padding</label>
+            <span className="text-[9px] font-mono text-brand-mute">
+              {p.spacing?.paddingTop ?? p.spacing?.padding?.topBottom ?? 40}px
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="160"
+            step="4"
+            value={p.spacing?.paddingTop ?? p.spacing?.padding?.topBottom ?? 40}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              updateNestedProp("spacing", "paddingTop", val);
+              if (onChangeStyles) {
+                onChangeStyles({ paddingTop: `${val}px` });
+              }
+            }}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <div className="flex justify-between items-center">
+            <label className="text-[11px] font-sans font-semibold text-brand-body">Bottom Padding</label>
+            <span className="text-[9px] font-mono text-brand-mute">
+              {p.spacing?.paddingBottom ?? p.spacing?.padding?.topBottom ?? 40}px
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="160"
+            step="4"
+            value={p.spacing?.paddingBottom ?? p.spacing?.padding?.topBottom ?? 40}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              updateNestedProp("spacing", "paddingBottom", val);
+              if (onChangeStyles) {
+                onChangeStyles({ paddingBottom: `${val}px` });
+              }
+            }}
+            className="w-full accent-brand-primary cursor-pointer"
+          />
+        </div>
+      </div>
     </div>
   );
 };

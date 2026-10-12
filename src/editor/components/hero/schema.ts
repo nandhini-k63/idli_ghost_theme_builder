@@ -1,2 +1,90 @@
-export const defaultProps = { title: "Verve Landing", subtitle: "Build visual layout sections at rapid speeds.", buttonLabel: "Get Started" };
-export const defaultStyles = {};
+export interface HeroSlide {
+  id: string;
+  eyebrowText?: string;
+  title: string;
+  subtitle: string;
+  buttonLabel?: string;
+  buttonUrl?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  bgImageUrl?: string;
+}
+
+export interface HeroProps {
+  eyebrowText: string;
+  title: string;
+  subtitle: string;
+  buttonLabel: string;
+  buttonUrl: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+  showSecondaryButton: boolean;
+  secondaryButtonLabel: string;
+  secondaryButtonUrl: string;
+  useSiteData?: boolean;
+  useCoverImageAsBackground?: boolean;
+  textColor?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+
+  // Carousel Options
+  enableCarousel?: boolean;
+  carouselMode?: "static" | "dynamic";
+  dynamicTag?: string;
+  slides?: HeroSlide[];
+  autoplay?: boolean;
+  autoplayInterval?: number;
+  showArrows?: boolean;
+  showDots?: boolean;
+  transitionEffect?: "slide" | "fade";
+}
+
+export const defaultProps: HeroProps = {
+  eyebrowText: "A Ghost Publication",
+  title: "Thoughts, stories & ideas.",
+  subtitle: "Insightful articles, thoughtful perspectives, and fresh ideas delivered directly to your feed.",
+  buttonLabel: "Start Reading",
+  buttonUrl: "#posts",
+  showSecondaryButton: true,
+  secondaryButtonLabel: "Subscribe",
+  secondaryButtonUrl: "#newsletter",
+  useSiteData: false,
+  useCoverImageAsBackground: false,
+  textColor: "",
+  imageUrl: "",
+  imageAlt: "Hero Image",
+
+  // Carousel Defaults
+  enableCarousel: false,
+  carouselMode: "static",
+  dynamicTag: "hero-carousel",
+  slides: [
+    {
+      id: "slide-1",
+      eyebrowText: "Featured",
+      title: "Discover Verve Edition",
+      subtitle: "Experience modern publishing with fluid visual storytelling.",
+      buttonLabel: "Explore Now",
+      buttonUrl: "#",
+      imageUrl: "",
+      imageAlt: "Slide 1 Image",
+    },
+    {
+      id: "slide-2",
+      eyebrowText: "New Release",
+      title: "Built For Modern Creators",
+      subtitle: "Craft lightning-fast dynamic publication layouts in Ghost CMS.",
+      buttonLabel: "Get Started",
+      buttonUrl: "#",
+      imageUrl: "",
+      imageAlt: "Slide 2 Image",
+    },
+  ],
+  autoplay: true,
+  autoplayInterval: 5000,
+  showArrows: true,
+  showDots: true,
+  transitionEffect: "slide",
+};
+
+export const defaultStyles = { backgroundType: "solid", layout: "center" };

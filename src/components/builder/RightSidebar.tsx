@@ -2,49 +2,102 @@
 
 import { useEditorStore } from "@/store/editorStore";
 import { componentRegistry } from "@/editor/components/registry";
-import { Trash2, Settings, Sliders } from "lucide-react";
+import { Trash2, Settings, Sliders, ChevronLeft, ChevronRight, Ungroup, BoxSelect, Columns } from "lucide-react";
+import { SpacingControl } from "@/editor/components/shared/SpacingControl";
+import { BackgroundControls } from "@/editor/components/shared/BackgroundControls";
+
+const HAS_DEDICATED_BG_CONTROL = new Set([
+  "header",
+  "footer",
+  "hero",
+  "newsletter",
+  "post-grid",
+  "testimonials",
+  "faq",
+  "grid-gallery",
+  "logo-cloud",
+  "related-posts",
+  "stats",
+  "team",
+  "section",
+  "container",
+  "columns",
+  "cards",
+]);
+
+const HAS_DEDICATED_SPACING_CONTROL = new Set([
+  "header",
+  "footer",
+  "hero",
+  "section",
+  "container",
+  "columns",
+  "faq",
+  "grid-gallery",
+  "logo-cloud",
+  "post-grid",
+  "stats",
+  "team",
+  "testimonials",
+]);
 
 export default function RightSidebar() {
-  const { 
-    selectedBlockId, 
-    document: themeDoc, 
-    updateBlockProps, 
-    updateBlockStyles, 
-    deleteBlock 
+  const {
+    selectedBlockId,
+    document: themeDoc,
+    updateBlockProps,
+    updateBlockStyles,
+    deleteBlock,
+    unwrapBlock,
+    wrapBlock,
+    makeAdjacent,
+    isRightSidebarOpen,
+    toggleRightSidebar,
   } = useEditorStore();
 
   const selectedBlock = selectedBlockId ? themeDoc.blocks[selectedBlockId] : null;
 
-  const getInputValue = (val: any): string => {
+  const getInputValue = (val: unknown): string => {
     if (!val) return "";
     if (typeof val === "string") return val;
-    return val.desktop || "";
-  };
-
-  const handlePropChange = (key: string, value: any) => {
-    if (selectedBlockId) {
-      updateBlockProps(selectedBlockId, { [key]: value });
+    if (typeof val === "object" && val !== null && "desktop" in val) {
+      return String((val as { desktop?: unknown }).desktop || "");
     }
+    return String(val);
   };
 
-  const handleStyleChange = (key: string, value: any) => {
+  const handleStyleChange = (key: string, value: unknown) => {
     if (selectedBlockId) {
       updateBlockStyles(selectedBlockId, { [key]: value });
     }
   };
 
-  const vercelColors = [
-    { label: "Ink (Primary)", value: "#171717" },
-    { label: "Body Text", value: "#4d4d4d" },
-    { label: "Mute Gray", value: "#888888" },
-    { label: "Vercel Blue", value: "#0070f3" },
-    { label: "Success Green", value: "#0070f3" },
-    { label: "Error Red", value: "#ee0000" },
-    { label: "Warning Gold", value: "#f5a623" },
-  ];
+  if (!isRightSidebarOpen) {
+    return (
+      <aside className="builder-right-sidebar w-[44px] border-l border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col items-center py-3 shrink-0 select-none shadow-level-1 gap-4 transition-all duration-200 z-30">
+        <button
+          onClick={() => toggleRightSidebar(true)}
+          className="p-2 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+          title="Expand inspector"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <div className="w-6 h-[1px] bg-brand-hairline" />
+        <button
+          onClick={() => toggleRightSidebar(true)}
+          className={`p-2 rounded-sm transition-colors ${
+            selectedBlockId ? "text-brand-ink bg-brand-canvas-soft shadow-xs" : "text-brand-mute hover:text-brand-ink"
+          }`}
+          title={selectedBlockId ? `Inspect ${themeDoc.blocks[selectedBlockId]?.type || "Block"}` : "Inspector"}
+        >
+          <Sliders size={16} />
+        </button>
+      </aside>
+    );
+  }
 
   return (
-    <aside className="w-[300px] border-l border-brand-hairline bg-white flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto">
+    <aside className="builder-right-sidebar w-[300px] border-l border-brand-hairline bg-brand-canvas text-brand-ink flex flex-col shrink-0 select-none shadow-level-1 overflow-y-auto transition-all duration-200">
       {selectedBlock ? (
         <div className="p-4 flex flex-col gap-6">
           {/* Header */}
@@ -55,14 +108,71 @@ export default function RightSidebar() {
                 Inspect: {selectedBlock.type}
               </span>
             </div>
-            <button
-              onClick={() => deleteBlock(selectedBlock.id)}
-              className="p-1 text-brand-mute hover:text-brand-error hover:bg-brand-canvas-soft-2 rounded-sm transition-all"
-              title="Delete Block"
-            >
-              <Trash2 size={14} />
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Unwrap button */}
+              {(selectedBlock.type === "container" || selectedBlock.type === "section" || (selectedBlock.childrenIds && selectedBlock.childrenIds.length > 0)) && (
+                <button
+                  type="button"
+                  onClick={() => unwrapBlock(selectedBlock.id)}
+                  className="p-1 text-brand-mute hover:text-brand-primary hover:bg-brand-canvas-soft rounded-sm transition-all"
+                  title="Unwrap (extract all inner items)"
+                >
+                  <Ungroup size={14} />
+                </button>
+              )}
+              {/* Adjacent button for containers */}
+              {selectedBlock.type === "container" && (
+                <button
+                  type="button"
+                  onClick={() => makeAdjacent(selectedBlock.id)}
+                  className="p-1 text-brand-mute hover:text-brand-primary hover:bg-brand-canvas-soft rounded-sm transition-all"
+                  title="Duplicate beside as adjacent column"
+                >
+                  <Columns size={14} />
+                </button>
+              )}
+              {/* Wrap in container */}
+              {selectedBlock.type !== "container" && selectedBlock.type !== "section" && selectedBlock.type !== "header" && selectedBlock.type !== "footer" && (
+                <button
+                  type="button"
+                  onClick={() => wrapBlock(selectedBlock.id, "container")}
+                  className="p-1 text-brand-mute hover:text-brand-primary hover:bg-brand-canvas-soft rounded-sm transition-all"
+                  title="Wrap in Container"
+                >
+                  <BoxSelect size={14} />
+                </button>
+              )}
+              {selectedBlock.type !== "header" &&
+                selectedBlock.type !== "footer" &&
+                themeDoc.layouts?.header !== selectedBlock.id &&
+                themeDoc.layouts?.footer !== selectedBlock.id && (
+                  <button
+                    onClick={() => deleteBlock(selectedBlock.id)}
+                    className="p-1 text-brand-mute hover:text-brand-error hover:bg-brand-canvas-soft-2 rounded-sm transition-all"
+                    title="Delete Block"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              <button
+                onClick={() => toggleRightSidebar(false)}
+                className="p-1 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+                title="Collapse inspector"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
+
+          {/* Global Layout Warning */}
+          {(selectedBlock.type === "header" || selectedBlock.type === "footer") && (
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex gap-2 items-start shadow-sm">
+              <span className="text-amber-500 mt-0.5">ⓘ</span>
+              <p className="text-[11px] text-amber-800 leading-relaxed font-medium">
+                This section belongs to Default layout, so changes here affect every template using that layout.
+              </p>
+            </div>
+          )}
 
           {/* Properties Section */}
           <div className="flex flex-col gap-4">
@@ -75,10 +185,14 @@ export default function RightSidebar() {
                   <SidebarElement
                     block={selectedBlock}
                     onChangeProps={(props) => {
-                      Object.entries(props).forEach(([k, v]) => handlePropChange(k, v));
+                      if (selectedBlockId) {
+                        updateBlockProps(selectedBlockId, props);
+                      }
                     }}
                     onChangeStyles={(styles) => {
-                      Object.entries(styles).forEach(([k, v]) => handleStyleChange(k, v));
+                      if (selectedBlockId) {
+                        updateBlockStyles(selectedBlockId, styles);
+                      }
                     }}
                   />
                 );
@@ -92,18 +206,8 @@ export default function RightSidebar() {
             <span className="font-mono text-[9px] uppercase tracking-wider text-brand-mute">Styles</span>
 
             {/* Typography Styles */}
-            {(selectedBlock.type === "heading" || selectedBlock.type === "text") && (
+            {selectedBlock.type === "heading" && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Font Size</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 16px, 2.5rem"
-                    value={getInputValue(selectedBlock.styles.fontSize)}
-                    onChange={(e) => handleStyleChange("fontSize", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Font Weight</label>
                   <select
@@ -136,17 +240,32 @@ export default function RightSidebar() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Text Color</label>
-                  <select
-                    value={getInputValue(selectedBlock.styles.textColor)}
-                    onChange={(e) => handleStyleChange("textColor", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  >
-                    <option value="">Default Inherit</option>
-                    {vercelColors.map((c) => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-sans font-semibold text-brand-body">Font Color</label>
+                    {selectedBlock.styles.textColor && (
+                      <button
+                        onClick={() => handleStyleChange("textColor", "")}
+                        className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
+                      >
+                        Reset Default
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="color"
+                      value={getInputValue(selectedBlock.styles.textColor) || "#171717"}
+                      onChange={(e) => handleStyleChange("textColor", e.target.value)}
+                      className="w-8 h-8 rounded border border-brand-hairline p-0.5 cursor-pointer shrink-0 bg-transparent"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Inherit / #171717"
+                      value={getInputValue(selectedBlock.styles.textColor)}
+                      onChange={(e) => handleStyleChange("textColor", e.target.value)}
+                      className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
+                    />
+                  </div>
                 </div>
               </>
             )}
@@ -171,7 +290,7 @@ export default function RightSidebar() {
             )}
 
             {/* Layout Alignment */}
-            {(selectedBlock.type === "heading" || selectedBlock.type === "text" || selectedBlock.type === "container") && (
+            {(selectedBlock.type === "heading" || selectedBlock.type === "container") && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-sans font-semibold text-brand-body">Alignment</label>
                 <div className="grid grid-cols-3 gap-1 bg-brand-canvas-soft-2 p-0.5 rounded-sm">
@@ -179,11 +298,10 @@ export default function RightSidebar() {
                     <button
                       key={align}
                       onClick={() => handleStyleChange("textAlign", align)}
-                      className={`py-1 text-[10px] uppercase font-mono rounded-xs transition-all ${
-                        getInputValue(selectedBlock.styles.textAlign) === align
-                          ? "bg-white text-brand-ink shadow-level-2 font-semibold"
-                          : "text-brand-mute hover:text-brand-ink"
-                      }`}
+                      className={`py-1 text-[10px] uppercase font-mono rounded-xs transition-all ${getInputValue(selectedBlock.styles.textAlign) === align
+                        ? "bg-brand-canvas text-brand-ink shadow-level-2 font-semibold"
+                        : "text-brand-mute hover:text-brand-ink"
+                        }`}
                     >
                       {align}
                     </button>
@@ -205,24 +323,26 @@ export default function RightSidebar() {
             </div>
 
             {/* Box Shadow Setting */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Box Shadow</label>
-              <select
-                value={getInputValue(selectedBlock.styles.boxShadow)}
-                onChange={(e) => handleStyleChange("boxShadow", e.target.value)}
-                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              >
-                <option value="">None</option>
-                <option value="0 2px 8px rgba(0,0,0,0.04)">Soft (Level 1)</option>
-                <option value="0 8px 16px rgba(0,0,0,0.06)">Medium (Level 2)</option>
-                <option value="0 16px 32px rgba(0,0,0,0.08)">Large (Level 3)</option>
-                <option value="0 8px 24px rgba(23,23,23,0.06)">Dark Glow</option>
-                <option value="0 8px 24px rgba(0,112,243,0.12)">Accent Blue Glow</option>
-              </select>
-            </div>
+            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Box Shadow</label>
+                <select
+                  value={getInputValue(selectedBlock.styles.boxShadow)}
+                  onChange={(e) => handleStyleChange("boxShadow", e.target.value)}
+                  className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="">None</option>
+                  <option value="0 4px 12px rgba(0,0,0,0.15)">Soft (Level 1)</option>
+                  <option value="0 12px 24px rgba(0,0,0,0.25)">Medium (Level 2)</option>
+                  <option value="0 20px 40px rgba(0,0,0,0.35)">Large (Level 3)</option>
+                  <option value="0 12px 36px rgba(23,23,23,0.5)">Dark Glow</option>
+                  <option value="0 12px 36px rgba(0,112,243,0.4)">Accent Blue Glow</option>
+                </select>
+              </div>
+            )}
 
             {/* General Styling Controls */}
-            {selectedBlock.type !== "header" && (
+            {selectedBlock.type !== "header" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Border Line</label>
@@ -249,19 +369,21 @@ export default function RightSidebar() {
                 )}
               </>
             )}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Backdrop Blur (Glassmorphism)</label>
-              <select
-                value={getInputValue(selectedBlock.styles.backdropBlur)}
-                onChange={(e) => handleStyleChange("backdropBlur", e.target.value)}
-                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              >
-                <option value="">None</option>
-                <option value="4px">Light (4px)</option>
-                <option value="8px">Medium (8px)</option>
-                <option value="16px">Heavy (16px)</option>
-              </select>
-            </div>
+            {selectedBlock.type !== "logo-cloud" && selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Backdrop Blur (Glassmorphism)</label>
+                <select
+                  value={getInputValue(selectedBlock.styles.backdropBlur)}
+                  onChange={(e) => handleStyleChange("backdropBlur", e.target.value)}
+                  className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="">None</option>
+                  <option value="4px">Light (4px)</option>
+                  <option value="8px">Medium (8px)</option>
+                  <option value="16px">Heavy (16px)</option>
+                </select>
+              </div>
+            )}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-sans font-semibold text-brand-body">Opacity</label>
               <select
@@ -276,22 +398,24 @@ export default function RightSidebar() {
                 <option value="0.25">25%</option>
               </select>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Hover Effect</label>
-              <select
-                value={getInputValue(selectedBlock.styles.hoverEffect)}
-                onChange={(e) => handleStyleChange("hoverEffect", e.target.value)}
-                className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-              >
-                <option value="">None</option>
-                <option value="scale">Scale Up (1.02x)</option>
-                <option value="float">Float Up (-4px)</option>
-                <option value="glow">Soft Glow Shadow</option>
-              </select>
-            </div>
+            {selectedBlock.type !== "heading" && selectedBlock.type !== "text" && selectedBlock.type !== "share" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Hover Effect</label>
+                <select
+                  value={getInputValue(selectedBlock.styles.hoverEffect)}
+                  onChange={(e) => handleStyleChange("hoverEffect", e.target.value)}
+                  className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+                >
+                  <option value="">None</option>
+                  <option value="scale">Scale Up (1.02x)</option>
+                  <option value="float">Float Up (-4px)</option>
+                  <option value="glow">Soft Glow Shadow</option>
+                </select>
+              </div>
+            )}
 
-            {/* Section/Spacing Styles */}
-            {selectedBlock.type === "section" && (
+            {/* Section Outer / Content Width */}
+            {(selectedBlock.type === "section" || selectedBlock.type === "featured-posts" || selectedBlock.type === "post-content") && (
               <>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-semibold text-brand-body">Section Outer Width</label>
@@ -313,137 +437,63 @@ export default function RightSidebar() {
                     className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Padding Top</label>
-                  <input
-                    type="text"
-                    value={getInputValue(selectedBlock.styles.paddingTop)}
-                    onChange={(e) => handleStyleChange("paddingTop", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Padding Bottom</label>
-                  <input
-                    type="text"
-                    value={getInputValue(selectedBlock.styles.paddingBottom)}
-                    onChange={(e) => handleStyleChange("paddingBottom", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-sans font-semibold text-brand-body">Background Color</label>
-                    {selectedBlock.styles.backgroundColor && (
-                      <button
-                        onClick={() => handleStyleChange("backgroundColor", "")}
-                        className="text-[10px] font-sans text-brand-mute hover:text-brand-error cursor-pointer"
-                      >
-                        Set Transparent
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={getInputValue(selectedBlock.styles.backgroundColor) || "#ffffff"}
-                      onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                      className="w-12 h-8 border border-brand-hairline rounded-sm focus:outline-none bg-transparent cursor-pointer shrink-0"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Transparent"
-                      value={getInputValue(selectedBlock.styles.backgroundColor)}
-                      onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                      className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-mono focus:outline-none bg-brand-canvas-soft"
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Background Image URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://..."
-                    value={getInputValue(selectedBlock.styles.backgroundImage)}
-                    onChange={(e) => handleStyleChange("backgroundImage", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-sans font-semibold text-brand-body">Background Video URL</label>
-                  <input
-                    type="text"
-                    placeholder="https://...mp4"
-                    value={getInputValue(selectedBlock.styles.backgroundVideoUrl)}
-                    onChange={(e) => handleStyleChange("backgroundVideoUrl", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                  />
-                </div>
-                {(!!getInputValue(selectedBlock.styles.backgroundImage) || !!getInputValue(selectedBlock.styles.backgroundVideoUrl)) && (
-                  <>
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="checkbox"
-                        id="enableParallax"
-                        checked={!!selectedBlock.styles.enableParallax}
-                        onChange={(e) => handleStyleChange("enableParallax", e.target.checked)}
-                        className="rounded-xs border-brand-hairline accent-brand-primary cursor-pointer"
-                      />
-                      <label htmlFor="enableParallax" className="text-[11px] font-sans font-semibold text-brand-body cursor-pointer">Enable Parallax Effect</label>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Background Size</label>
-                      <select
-                        value={getInputValue(selectedBlock.styles.backgroundSize) || "cover"}
-                        onChange={(e) => handleStyleChange("backgroundSize", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      >
-                        <option value="cover">Cover (Fill)</option>
-                        <option value="contain">Contain (Fit)</option>
-                        <option value="auto">Auto (Original)</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Background Repeat</label>
-                      <select
-                        value={getInputValue(selectedBlock.styles.backgroundRepeat) || "no-repeat"}
-                        onChange={(e) => handleStyleChange("backgroundRepeat", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      >
-                        <option value="no-repeat">No Repeat</option>
-                        <option value="repeat">Repeat (Tile)</option>
-                        <option value="repeat-x">Repeat X (Horizontal)</option>
-                        <option value="repeat-y">Repeat Y (Vertical)</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-sans font-semibold text-brand-body">Background Position</label>
-                      <select
-                        value={getInputValue(selectedBlock.styles.backgroundPosition) || "center"}
-                        onChange={(e) => handleStyleChange("backgroundPosition", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
-                      >
-                        <option value="center">Center</option>
-                        <option value="top">Top</option>
-                        <option value="bottom">Bottom</option>
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                      </select>
-                    </div>
-                  </>
-                )}
               </>
+            )}
+
+            {/* Spacing Controls with live sliders */}
+            {!HAS_DEDICATED_SPACING_CONTROL.has(selectedBlock.type) && (
+              <div className="border-t border-brand-hairline pt-3">
+                <SpacingControl
+                  title="Spacing"
+                  topValue={getInputValue(selectedBlock.styles.paddingTop)}
+                  bottomValue={getInputValue(selectedBlock.styles.paddingBottom)}
+                  leftValue={getInputValue(selectedBlock.styles.paddingLeft)}
+                  rightValue={getInputValue(selectedBlock.styles.paddingRight)}
+                  onChangeTop={(val) => handleStyleChange("paddingTop", val)}
+                  onChangeBottom={(val) => handleStyleChange("paddingBottom", val)}
+                  onChangeHorizontal={(val) => {
+                    handleStyleChange("paddingLeft", val);
+                    handleStyleChange("paddingRight", val);
+                  }}
+                  showHorizontal={true}
+                />
+              </div>
+            )}
+            {!HAS_DEDICATED_BG_CONTROL.has(selectedBlock.type) && (
+              <BackgroundControls
+                styles={selectedBlock.styles}
+                appearance={{ backgroundColor: (selectedBlock.styles?.backgroundColor as string) || "" }}
+                onChangeStyles={(styles) => {
+                  if (selectedBlockId) {
+                    updateBlockStyles(selectedBlockId, styles);
+                  }
+                }}
+                updateAppearance={(_, v) => {
+                  if (selectedBlockId) {
+                    updateBlockStyles(selectedBlockId, { backgroundColor: v });
+                  }
+                }}
+              />
             )}
           </div>
         </div>
       ) : (
         <div className="p-4 flex flex-col gap-6">
           {/* Default state: Theme settings */}
-          <div className="flex items-center gap-1.5 border-b border-brand-hairline pb-3">
-            <Settings size={13} className="text-brand-ink" />
-            <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink">
-              Theme Settings
-            </span>
+          <div className="flex items-center justify-between border-b border-brand-hairline pb-3">
+            <div className="flex items-center gap-1.5">
+              <Settings size={13} className="text-brand-ink" />
+              <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink">
+                Theme Settings
+              </span>
+            </div>
+            <button
+              onClick={() => toggleRightSidebar(false)}
+              className="p-1 text-brand-mute hover:text-brand-ink hover:bg-brand-canvas-soft rounded-sm transition-colors"
+              title="Collapse inspector"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -465,16 +515,14 @@ export default function RightSidebar() {
                 disabled
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Primary Color</label>
-              <div className="flex gap-2 items-center">
-                <span className="w-5 h-5 rounded-full border border-brand-hairline-strong bg-brand-primary"></span>
-                <span className="font-mono text-xs text-brand-body">#171717</span>
+            <div className="flex flex-col gap-1.5 p-2.5 rounded-md border border-brand-hairline bg-brand-canvas-soft">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-sans font-semibold text-brand-body">Typography</label>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium">Ghost Admin</span>
               </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-sans font-semibold text-brand-body">Global Typography</label>
-              <span className="text-xs text-brand-body font-mono font-medium">Geist Sans & Geist Mono</span>
+              <p className="text-[11px] text-brand-body leading-relaxed">
+                Heading font & Body font are configured in <strong>Ghost Admin &rarr; Settings &rarr; Design & branding &rarr; Typography</strong>.
+              </p>
             </div>
           </div>
 
