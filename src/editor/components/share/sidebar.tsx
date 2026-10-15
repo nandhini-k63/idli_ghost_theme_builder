@@ -249,7 +249,34 @@ export const SidebarElement = ({
         </div>
       )}
 
-      {/* 7. BOTTOM MARGIN */}
+      {/* 7. MOBILE RESPONSIVE */}
+      <div className="flex flex-col gap-2 pt-2 border-t border-brand-hairline">
+        <label className="text-[11px] font-semibold text-brand-body">
+          Responsive
+        </label>
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] text-brand-body">Full-width on mobile</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={p.mobileFullWidth}
+            onClick={() => updateProp("mobileFullWidth", !p.mobileFullWidth)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+              p.mobileFullWidth
+                ? "bg-brand-link"
+                : "bg-brand-canvas-soft dark:bg-neutral-700 border border-brand-hairline"
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-xs transition-transform ${
+                p.mobileFullWidth ? "translate-x-4" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* 8. BOTTOM MARGIN */}
       <div className="flex flex-col gap-1.5 pt-2 border-t border-brand-hairline">
         <label className="text-[11px] font-semibold text-brand-body">
           Bottom Margin

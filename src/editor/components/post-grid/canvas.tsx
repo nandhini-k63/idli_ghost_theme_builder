@@ -2,6 +2,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { getBackgroundStyle } from "../shared/background";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { useEditorStore } from "@/store/editorStore";
 
 export const CanvasElement = ({ block }: {
   block: BuilderBlock;
@@ -65,8 +66,13 @@ export const CanvasElement = ({ block }: {
 
   displayPosts = displayPosts.slice(0, limit);
 
-  const gridColsClass = layoutStyle === "list" ? "grid-cols-1" : `grid-cols-1 sm:grid-cols-2 lg:grid-cols-${columns}`;
-  const isMagazine = layoutStyle === "magazine";
+  const deviceMode = useEditorStore((s) => s.deviceMode);
+  const isMobile = deviceMode === "mobile";
+  const isTablet = deviceMode === "tablet";
+
+  const activeCols = layoutStyle === "list" ? 1 : isMobile ? 1 : isTablet ? Math.min(columns, 2) : columns;
+  const gridStyle = { display: "grid", gridTemplateColumns: `repeat(${activeCols}, minmax(0, 1fr))`, gap: "1.5rem" } as React.CSSProperties;
+    const isMagazine = layoutStyle === "magazine";
   const featurePost = displayPosts[0];
   const listPosts = displayPosts.slice(1);
 
@@ -135,7 +141,7 @@ export const CanvasElement = ({ block }: {
             </div>
           </div>
         ) : (
-          <div className={`grid ${gridColsClass} gap-4 sm:gap-6 lg:gap-8 w-full`}>
+          <div style={gridStyle} className="w-full">
             {displayPosts.map(post => (
             <article 
               key={post.id} 

@@ -12,6 +12,7 @@ export interface ShareProps {
   alignment: ShareAlignment;
   customColor?: string;
   borderRadius?: string;
+  mobileFullWidth: boolean;
 }
 
 export const defaultProps: ShareProps = {
@@ -23,6 +24,7 @@ export const defaultProps: ShareProps = {
   alignment: "left",
   customColor: "",
   borderRadius: "rounded-full",
+  mobileFullWidth: false,
 };
 
 export const defaultStyles = {};
@@ -45,5 +47,6 @@ export function resolveShareProps(props?: Record<string, unknown>): ShareProps {
       : defaultProps.alignment,
     customColor: typeof p.customColor === "string" ? p.customColor : "",
     borderRadius: typeof p.borderRadius === "string" ? p.borderRadius : defaultProps.borderRadius,
+    mobileFullWidth: p.mobileFullWidth !== undefined ? Boolean(p.mobileFullWidth) : defaultProps.mobileFullWidth,
   };
 }

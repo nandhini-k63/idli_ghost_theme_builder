@@ -1,6 +1,7 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { useEditorStore } from "@/store/editorStore";
 
 export const CanvasElement = ({ block }: {
   block: BuilderBlock;
@@ -10,6 +11,9 @@ export const CanvasElement = ({ block }: {
   renderChildren?: () => React.ReactNode;
 }) => {
   useCanvasDarkMode();
+  const deviceMode = useEditorStore((s) => s.deviceMode);
+  const isMobile = deviceMode === "mobile";
+  const isTablet = deviceMode === "tablet";
   const limit = block.props.limit !== undefined ? block.props.limit : 3;
   const allMockPosts = [
     { id: 1, title: "Building custom Ghost themes with Next.js", excerpt: "Learn how to establish an elegant AST rendering architecture.", date: "August 20, 2026", readingTime: "4 min read", category: "Engineering", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80" },
@@ -66,7 +70,7 @@ export const CanvasElement = ({ block }: {
       )}
       
       {layout === "split" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className={`grid gap-8 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"}`}>
           <div className="lg:col-span-7 bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all">
             <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
               <img src={featured.image} alt={featured.title} className="w-full h-full object-cover grayscale opacity-90 transition-all duration-300" />
@@ -98,8 +102,8 @@ export const CanvasElement = ({ block }: {
           mockPosts.length === 1
             ? "grid-cols-1 justify-items-center"
             : mockPosts.length === 2
-            ? "grid-cols-1 sm:grid-cols-2 justify-center"
-            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            ? (isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2 justify-center" : "grid-cols-2 justify-center")
+            : (isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-3")
         }`}>
           {mockPosts.map(post => (
             <div key={post.id} className={`bg-white dark:bg-neutral-900 border border-brand-hairline rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all ${mockPosts.length === 1 ? "w-full max-w-[420px]" : "w-full"}`}>
@@ -170,7 +174,7 @@ export const CanvasElement = ({ block }: {
       )}
 
       {layout === "bento" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-2"}`}>
           {mockPosts.map((post, idx) => {
             const isLarge = idx % 3 === 0;
             return (
@@ -207,7 +211,7 @@ export const CanvasElement = ({ block }: {
 
       {layout === "editorial" && (
         <div className="flex flex-col gap-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className={`grid gap-8 items-start ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"}`}>
             <div className="lg:col-span-7 bg-white dark:bg-neutral-900 border border-brand-hairline rounded-xl overflow-hidden shadow-level-2 group hover:shadow-level-3 transition-all">
               <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
                 <img src={featured.image} alt={featured.title} className="w-full h-full object-cover grayscale opacity-90" />
@@ -241,7 +245,7 @@ export const CanvasElement = ({ block }: {
           </div>
 
           {mockPosts.length > 3 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-brand-hairline">
+            <div className={`grid gap-6 pt-4 border-t border-brand-hairline ${isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-3"}`}>
               {mockPosts.slice(3).map(post => (
                 <div key={post.id} className="bg-white dark:bg-neutral-900 border border-brand-hairline rounded-lg overflow-hidden flex flex-col shadow-level-1 group hover:shadow-level-2 transition-all">
                   <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
@@ -333,4 +337,4 @@ export const CanvasElement = ({ block }: {
       )}
     </div>
   );
-};
+};

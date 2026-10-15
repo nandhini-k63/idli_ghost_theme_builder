@@ -25,14 +25,10 @@ export const CanvasElement = ({
   const columns = Math.min(Math.max(2, p.columns || 3), 4);
   const cardStyle = p.cardStyle || "bordered";
 
-  // Grid columns class based on deviceMode
-  const getGridColsClass = () => {
-    if (deviceMode === "mobile") return "grid-cols-1";
-    if (deviceMode === "tablet") return "grid-cols-2";
-    if (columns === 2) return "grid-cols-1 sm:grid-cols-2";
-    if (columns === 4) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
-    return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
-  };
+  // Grid columns — driven by deviceMode so the canvas preview matches the device switcher
+  const activeCols = deviceMode === "mobile" ? 1 : deviceMode === "tablet" ? Math.min(columns, 2) : columns;
+  const getGridColsClass = () => "";
+  const gridStyle = { display: "grid", gridTemplateColumns: `repeat(${activeCols}, minmax(0, 1fr))`, gap: "1.5rem" } as React.CSSProperties;
 
   const getCardStyleClass = () => {
     if (cardStyle === "soft") {
@@ -87,7 +83,7 @@ export const CanvasElement = ({
           </div>
         )}
 
-        <div className={`grid gap-6 ${getGridColsClass()}`}>
+        <div style={gridStyle}>
           {items.map((card) => (
             <div
               key={card.id}

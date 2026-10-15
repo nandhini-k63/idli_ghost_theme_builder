@@ -18,6 +18,7 @@ export const CanvasElement = ({
   useCanvasDarkMode();
   const p: ShareProps = resolveShareProps(block.props);
   const deviceMode = useEditorStore((state) => state.deviceMode);
+  const isMobile = deviceMode === "mobile";
   const [showNotice, setShowNotice] = useState(false);
 
   const resolveStyleLocal = (val: unknown): string | undefined => {
@@ -48,12 +49,14 @@ export const CanvasElement = ({
 
   const iconSize = p.size === "sm" ? 12 : p.size === "lg" ? 16 : 14;
 
+  const isFullWidth = isMobile && p.mobileFullWidth;
+
   // Alignment classes
   const alignmentClass = {
     left: "justify-start text-left",
     center: "justify-center text-center",
     right: "justify-end text-right",
-  }[p.alignment];
+  }[p.alignment] || "justify-start text-left";
 
   // Sizing tokens
   const sizeClasses = {
@@ -104,6 +107,8 @@ export const CanvasElement = ({
           onClick={handleShareClick}
           style={customBgStyle}
           className={`inline-flex items-center font-medium transition-all cursor-pointer ${
+            isFullWidth ? "w-full justify-center" : ""
+          } ${
             p.variant !== "pill" ? "rounded-md" : "rounded-full"
           } ${sizeClasses} ${getVariantButtonClass()}`}
           title={p.buttonText || "Share"}

@@ -41,7 +41,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
       ? `<span class="sr-only">${buttonText}</span>`
       : `<span>${buttonText}</span>`;
 
-  return `<div class="gh-share-wrapper ${alignClass}"${styleAttr}>
+  // Responsive CSS for mobileFullWidth
+  const responsiveCss = p.mobileFullWidth
+    ? `<style>@media(max-width:767px){.gh-share-wrapper.${alignClass} .gh-share-btn{width:100%;justify-content:center;}}</style>`
+    : "";
+
+  return `${responsiveCss}<div class="gh-share-wrapper ${alignClass}"${styleAttr}>
   <a href="#/share" class="gh-share-btn ${sizeClass} ${variantClass}"${customBgStyle} title="${buttonText}">
     ${iconSvg}
     ${labelHtml}

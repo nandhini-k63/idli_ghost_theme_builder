@@ -8,8 +8,63 @@ export const compileToHbs = (block: BuilderBlock): string => {
     ? ` <span class="gh-comments-count">({{comment_count empty="0" singular="" plural=""}})</span>`
     : "";
 
+  const containerMargin =
+    p.alignment === "left"
+      ? "2.5rem auto 2.5rem 0"
+      : p.alignment === "right"
+      ? "2.5rem 0 2.5rem auto"
+      : "2.5rem auto";
+
+  const headerJustify =
+    p.alignment === "left"
+      ? "flex-start"
+      : p.alignment === "right"
+      ? "flex-end"
+      : "center";
+
+  const wrapperId = `gh-comments-${block.id}`;
+
   return `{{#if comments}}
-<section class="gh-comments-section">
+<style>
+  #${wrapperId} {
+    width: 100%;
+    max-width: ${p.maxWidth};
+    margin: ${containerMargin};
+    padding: 0 1rem;
+    box-sizing: border-box;
+  }
+  #${wrapperId} .gh-comments-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: ${headerJustify};
+    text-align: ${p.alignment};
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-hairline, #ebebeb);
+  }
+  #${wrapperId} .gh-comments-icon {
+    flex-shrink: 0;
+  }
+  #${wrapperId} .gh-comments-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-ink, #171717);
+  }
+  #${wrapperId} .gh-comments-count {
+    color: var(--color-muted, #737373);
+    font-weight: 400;
+  }
+  @media (max-width: 640px) {
+    #${wrapperId} {
+      max-width: 100% !important;
+      padding: 0 0.5rem !important;
+      margin: 1.5rem auto !important;
+    }
+  }
+</style>
+<section id="${wrapperId}" class="gh-comments-section">
   <div class="gh-comments-header">
     <svg class="gh-comments-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <h3 class="gh-comments-heading">
@@ -28,7 +83,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
       var fgColor = isDark ? '#ffffff' : '#171717';
       var scheme = isDark ? 'dark' : 'light';
 
-      var sec = document.querySelector('.gh-comments-section');
+      var sec = document.getElementById('${wrapperId}') || document.querySelector('.gh-comments-section');
       if (sec) {
         sec.style.color = fgColor;
         sec.style.colorScheme = scheme;
@@ -94,7 +149,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
     var secObs = new MutationObserver(function() {
       syncGhostCommentsTheme();
     });
-    var targetSec = document.querySelector('.gh-comments-section');
+    var targetSec = document.getElementById('${wrapperId}') || document.querySelector('.gh-comments-section');
     if (targetSec) {
       secObs.observe(targetSec, { childList: true, subtree: true });
     }
@@ -125,4 +180,3 @@ export const compileToHbs = (block: BuilderBlock): string => {
 </script>
 {{/if}}`;
 };
-

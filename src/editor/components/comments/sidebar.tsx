@@ -2,6 +2,11 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveCommentsProps } from "./schema";
 import { Sparkles, AlertTriangle } from "lucide-react";
+import {
+  AlignmentControl,
+  MaxWidthControl,
+  ResponsiveToggle,
+} from "../shared/GhostCoreLayoutControls";
 
 export const SidebarElement = ({
   block,
@@ -53,7 +58,7 @@ export const SidebarElement = ({
           type="text"
           value={p.heading}
           onChange={(e) => updateProp("heading", e.target.value)}
-          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft"
+          className="w-full px-3 py-1.5 border border-brand-hairline rounded-sm text-xs font-sans focus:outline-none bg-brand-canvas-soft dark:bg-neutral-800 dark:border-neutral-700"
         />
       </div>
 
@@ -69,6 +74,32 @@ export const SidebarElement = ({
           Show comment count in heading
         </span>
       </label>
+
+      {/* Layout & Alignment */}
+      <div className="flex flex-col gap-3 pt-3 border-t border-brand-hairline dark:border-neutral-800">
+        <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink dark:text-white">
+          Layout & Alignment
+        </span>
+
+        <AlignmentControl
+          label="Heading & Container Alignment"
+          alignment={p.alignment}
+          onChange={(align) => updateProp("alignment", align)}
+        />
+
+        <MaxWidthControl
+          label="Discussion Max Width"
+          maxWidth={p.maxWidth}
+          onChange={(val) => updateProp("maxWidth", val)}
+        />
+
+        <ResponsiveToggle
+          label="Responsive Mobile Padding"
+          description="Tighten margins and optimize form touch targets on mobile viewports."
+          checked={p.responsivePadding}
+          onChange={(val) => updateProp("responsivePadding", val)}
+        />
+      </div>
     </div>
   );
 };

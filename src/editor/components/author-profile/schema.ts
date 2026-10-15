@@ -1,3 +1,5 @@
+import { HorizontalAlignment } from "../shared/GhostCoreLayoutControls";
+
 export interface AuthorProfileProps {
   name?: string;
   bio?: string;
@@ -6,6 +8,9 @@ export interface AuthorProfileProps {
   website?: string;
   twitter?: string;
   layoutStyle?: "banner" | "card";
+  alignment: HorizontalAlignment;
+  maxWidth: string;
+  stackOnMobile: boolean;
 }
 
 export const defaultProps: AuthorProfileProps = {
@@ -16,11 +21,19 @@ export const defaultProps: AuthorProfileProps = {
   website: "https://example.com",
   twitter: "@alexrivera",
   layoutStyle: "card",
+  alignment: "left",
+  maxWidth: "820px",
+  stackOnMobile: true,
 };
 
 export const defaultStyles = {};
 
 export function resolveAuthorProfileProps(raw?: Record<string, unknown>): AuthorProfileProps {
+  const alignment: HorizontalAlignment =
+    raw?.alignment === "left" || raw?.alignment === "center" || raw?.alignment === "right"
+      ? (raw.alignment as HorizontalAlignment)
+      : defaultProps.alignment;
+
   return {
     name: (raw?.name as string) || defaultProps.name,
     bio: (raw?.bio as string) || defaultProps.bio,
@@ -29,5 +42,8 @@ export function resolveAuthorProfileProps(raw?: Record<string, unknown>): Author
     website: (raw?.website as string) || defaultProps.website,
     twitter: (raw?.twitter as string) || defaultProps.twitter,
     layoutStyle: (raw?.layoutStyle as AuthorProfileProps["layoutStyle"]) || "card",
+    alignment,
+    maxWidth: typeof raw?.maxWidth === "string" && raw.maxWidth.trim().length > 0 ? raw.maxWidth : defaultProps.maxWidth,
+    stackOnMobile: raw?.stackOnMobile !== undefined ? Boolean(raw.stackOnMobile) : defaultProps.stackOnMobile,
   };
 }

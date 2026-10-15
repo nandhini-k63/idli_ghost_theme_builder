@@ -1,7 +1,11 @@
 import React from "react";
 import { BuilderBlock } from "@/types/theme";
-import { resolvePostNavigationProps } from "./schema";
-import { Sparkles, AlertTriangle } from "lucide-react";
+import { resolvePostNavigationProps, PostNavigationProps } from "./schema";
+import { Sparkles, AlertTriangle, AlignLeft, AlignCenter, AlignRight, Split } from "lucide-react";
+import {
+  ColumnsControl,
+  ResponsiveToggle,
+} from "../shared/GhostCoreLayoutControls";
 
 export const SidebarElement = ({
   block,
@@ -33,6 +37,13 @@ export const SidebarElement = ({
     });
   };
 
+  const alignOptions = [
+    { id: "split", label: "Split", icon: <Split size={12} /> },
+    { id: "left", label: "Left", icon: <AlignLeft size={12} /> },
+    { id: "center", label: "Center", icon: <AlignCenter size={12} /> },
+    { id: "right", label: "Right", icon: <AlignRight size={12} /> },
+  ] as const;
+
   return (
     <div className="flex flex-col gap-4 text-xs font-sans text-brand-ink">
       {/* Post Context Badge */}
@@ -55,13 +66,13 @@ export const SidebarElement = ({
         </p>
       </div>
 
-      {/* Toggles */}
+      {/* Layout & Style */}
       <div className="flex flex-col gap-3">
         <label className="flex flex-col gap-1.5">
           <span className="text-[11px] font-semibold text-brand-ink">Layout Style</span>
           <select
             value={p.layoutStyle}
-            onChange={(e) => updateProp("layoutStyle", e.target.value as any)}
+            onChange={(e) => updateProp("layoutStyle", e.target.value as PostNavigationProps["layoutStyle"])}
             className="w-full text-xs bg-brand-canvas border border-brand-hairline rounded-md px-2 py-1.5 focus:border-brand-primary outline-none"
           >
             <option value="split">Split (Side by side)</option>
@@ -72,7 +83,54 @@ export const SidebarElement = ({
             <option value="large-typography">Large Typography (Modern)</option>
           </select>
         </label>
-        <label className="flex items-center gap-2 cursor-pointer">
+
+        {/* Columns Control */}
+        <ColumnsControl
+          label="Columns on Desktop"
+          columns={p.columns}
+          options={[1, 2]}
+          onChange={(cols) => updateProp("columns", cols as 1 | 2)}
+        />
+
+        {/* Alignment Control */}
+        <div className="flex flex-col gap-1.5 select-none">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-brand-body dark:text-zinc-300">
+              Text Alignment
+            </span>
+            <span className="text-[10px] font-mono capitalize text-brand-mute">
+              {p.alignment}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-1 bg-brand-canvas-soft dark:bg-neutral-800 p-0.5 rounded border border-brand-hairline dark:border-neutral-700">
+            {alignOptions.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => updateProp("alignment", opt.id)}
+                className={`flex items-center justify-center gap-1 py-1 px-1.5 rounded-sm text-[11px] font-sans font-medium transition-all cursor-pointer ${
+                  p.alignment === opt.id
+                    ? "bg-white dark:bg-neutral-900 text-brand-ink dark:text-white shadow-xs font-semibold"
+                    : "text-brand-mute hover:text-brand-ink dark:hover:text-white"
+                }`}
+              >
+                {opt.icon}
+                <span className="text-[10px]">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Responsive Mobile Stack */}
+        <ResponsiveToggle
+          label="Stack vertically on mobile"
+          description="Collapses 2-column post cards into a clean vertical stack on mobile devices."
+          checked={p.stackOnMobile}
+          onChange={(val) => updateProp("stackOnMobile", val)}
+        />
+
+        {/* Feature toggles */}
+        <label className="flex items-center gap-2 cursor-pointer pt-2 border-t border-brand-hairline">
           <input
             type="checkbox"
             checked={p.showImage}
