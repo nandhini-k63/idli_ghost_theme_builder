@@ -3,6 +3,7 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveRelatedPostsProps } from "./schema";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { useEditorStore } from "@/store/editorStore";
 import { getBackgroundStyle } from "../shared/background";
 
 export const CanvasElement = ({
@@ -15,7 +16,9 @@ export const CanvasElement = ({
   renderChildren?: () => React.ReactNode;
 }) => {
   const isDark = useCanvasDarkMode();
-  const p = resolveRelatedPostsProps(block.props);
+  const deviceMode = useEditorStore((s) => s.deviceMode);
+  const isMobile = deviceMode === "mobile";
+    const p = resolveRelatedPostsProps(block.props);
   const bgStyle = getBackgroundStyle(block.styles, p.appearance);
   const isMesh = block.styles?.backgroundType === "mesh";
 
@@ -148,7 +151,7 @@ export const CanvasElement = ({
 
       {/* 1. SPLIT LAYOUT */}
       {layout === "split" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className={`grid gap-8 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"}`}>
           <div className="lg:col-span-7 bg-white dark:bg-neutral-900 border border-brand-hairline dark:border-white/10 rounded-md overflow-hidden flex flex-col shadow-level-2 group hover:shadow-level-3 transition-all">
             {p.showImage && (
               <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">
@@ -365,7 +368,7 @@ export const CanvasElement = ({
 
       {/* 5. BENTO GRID LAYOUT */}
       {layout === "bento" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-2"}`}>
           {mockPosts.map((post, idx) => {
             const isLarge = idx % 3 === 0;
             return (
@@ -426,7 +429,7 @@ export const CanvasElement = ({
       {/* 6. EDITORIAL LAYOUT */}
       {layout === "editorial" && (
         <div className="flex flex-col gap-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className={`grid gap-8 items-start ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"}`}>
             <article className="lg:col-span-7 bg-white dark:bg-neutral-900 border border-brand-hairline dark:border-white/10 rounded-xl overflow-hidden shadow-level-2 group hover:shadow-level-3 transition-all">
               {p.showImage && (
                 <div className="aspect-video relative overflow-hidden bg-brand-canvas-soft-2">

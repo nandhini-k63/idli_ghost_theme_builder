@@ -1,6 +1,7 @@
 import { ThemeDocument, BuilderBlock } from "../../types/theme";
 import { componentRegistry } from "@/editor/components/registry";
 import { getBackgroundCSS } from "@/editor/components/shared/background";
+import { isHeaderOrFooterBlock } from "@/editor/utils/blockTraversal";
 import { CASPER_ICON_PARTIALS } from "./casperIcons";
 
 /**
@@ -254,19 +255,6 @@ function compileBlockToHbs(blockId: string, blocks: Record<string, BuilderBlock>
 }
 
 /**
- * Checks whether a block or any of its descendants is a header or footer.
- */
-function isHeaderOrFooterBlock(blockId: string, blocks: Record<string, BuilderBlock>): boolean {
-  const block = blocks[blockId];
-  if (!block) return false;
-  if (block.type === "header" || block.type === "footer") return true;
-  if (block.childrenIds && block.childrenIds.length > 0) {
-    return block.childrenIds.some((cid) => isHeaderOrFooterBlock(cid, blocks));
-  }
-  return false;
-}
-
-/**
  * Compiles a page definition section list to a complete Handlebars markup string.
  */
 export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
@@ -305,10 +293,56 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
   }
 
   if (pageName === "author") {
-    return `{{!< default}}\n\n${mainContent}`;
+    const authorSections: string[] = [];
+    const postSections: string[] = [];
+
+    page.sections
+      .filter((sectionId) => !isHeaderOrFooterBlock(sectionId, doc.blocks))
+      .forEach((sectionId) => {
+        const block = doc.blocks[sectionId];
+        const markup = compileBlockToHbs(sectionId, doc.blocks, isPageContext);
+        if (!markup) return;
+        if (block?.type === "post-grid") {
+          postSections.push(markup);
+        } else {
+          authorSections.push(markup);
+        }
+      });
+
+    const authorMarkup = authorSections.join("\n");
+    const postMarkup = postSections.join("\n");
+    const wrappedAuthorMarkup =
+      authorMarkup && !authorMarkup.includes("{{#author}}")
+        ? `{{#author}}\n${authorMarkup}\n{{/author}}`
+        : authorMarkup;
+
+    return `{{!< default}}\n\n${wrappedAuthorMarkup}${postMarkup ? `\n${postMarkup}` : ""}`;
   }
   if (pageName === "tag") {
-    return `{{!< default}}\n\n${mainContent}`;
+    const tagSections: string[] = [];
+    const postSections: string[] = [];
+
+    page.sections
+      .filter((sectionId) => !isHeaderOrFooterBlock(sectionId, doc.blocks))
+      .forEach((sectionId) => {
+        const block = doc.blocks[sectionId];
+        const markup = compileBlockToHbs(sectionId, doc.blocks, isPageContext);
+        if (!markup) return;
+        if (block?.type === "post-grid") {
+          postSections.push(markup);
+        } else {
+          tagSections.push(markup);
+        }
+      });
+
+    const tagMarkup = tagSections.join("\n");
+    const postMarkup = postSections.join("\n");
+    const wrappedTagMarkup =
+      tagMarkup && !tagMarkup.includes("{{#tag}}")
+        ? `{{#tag}}\n${tagMarkup}\n{{/tag}}`
+        : tagMarkup;
+
+    return `{{!< default}}\n\n${wrappedTagMarkup}${postMarkup ? `\n${postMarkup}` : ""}`;
   }
 
   return `{{!< default}}\n\n${mainContent}`;

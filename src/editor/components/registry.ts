@@ -1,4 +1,4 @@
-import { ComponentDefinition } from "./types";
+﻿import { ComponentDefinition } from "./types";
 import * as heading from "./heading/schema";
 import * as headingCanvas from "./heading/canvas";
 import * as headingSidebar from "./heading/sidebar";
@@ -164,6 +164,14 @@ import * as cardsCanvas from "./cards/canvas";
 import * as cardsSidebar from "./cards/sidebar";
 import * as cardsCompiler from "./cards/compiler";
 
+import * as pricingTable from "./pricing-table/schema";
+import * as pricingTableCanvas from "./pricing-table/canvas";
+import * as pricingTableSidebar from "./pricing-table/sidebar";
+import * as pricingTableCompiler from "./pricing-table/compiler";
+import * as tableOfContents from "./table-of-contents/schema";
+import * as tableOfContentsCanvas from "./table-of-contents/canvas";
+import * as tableOfContentsSidebar from "./table-of-contents/sidebar";
+import * as tableOfContentsCompiler from "./table-of-contents/compiler";
 export const componentRegistry: Record<string, ComponentDefinition> = {
   heading: { type: "heading", ...heading, ...headingCanvas, ...headingSidebar, ...headingCompiler },
   text: { type: "text", ...text, ...textCanvas, ...textSidebar, ...textCompiler },
@@ -198,4 +206,6 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "related-posts": { type: "related-posts", ...relatedPosts, ...relatedPostsCanvas, ...relatedPostsSidebar, ...relatedPostsCompiler },
   "post-navigation": { type: "post-navigation", ...postNavigation, ...postNavigationCanvas, ...postNavigationSidebar, ...postNavigationCompiler },
   cards: { type: "cards", ...cards, ...cardsCanvas, ...cardsSidebar, ...cardsCompiler },
+  "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },
+  "table-of-contents": { type: "table-of-contents", ...tableOfContents, ...tableOfContentsCanvas, ...tableOfContentsSidebar, ...tableOfContentsCompiler },
 };

@@ -2,6 +2,10 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveTagHeaderProps } from "./schema";
 import { Tag } from "lucide-react";
+import {
+  AlignmentControl,
+  MaxWidthControl,
+} from "../shared/GhostCoreLayoutControls";
 
 export const SidebarElement = ({
   block,
@@ -31,6 +35,25 @@ export const SidebarElement = ({
         <p className="text-[11px] text-blue-800/90 mt-1 leading-relaxed">
           Displays the title, description, count, and feature image for the active tag route.
         </p>
+      </div>
+
+      {/* Layout & Alignment */}
+      <div className="flex flex-col gap-3 border-b border-brand-hairline pb-4">
+        <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink dark:text-white">
+          Layout & Alignment
+        </span>
+
+        <AlignmentControl
+          label="Header Alignment"
+          alignment={p.alignment}
+          onChange={(align) => updateProp("alignment", align)}
+        />
+
+        <MaxWidthControl
+          label="Header Max Width"
+          maxWidth={p.maxWidth}
+          onChange={(val) => updateProp("maxWidth", val)}
+        />
       </div>
 
       {/* Toggles */}

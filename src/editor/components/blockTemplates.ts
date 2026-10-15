@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Heading,
   Type,
@@ -24,6 +24,8 @@ import {
   FileText,
   ArrowLeftRight,
   Layers,
+  CreditCard,
+  ListTree,
 } from "lucide-react";
 
 export interface BlockTemplate {
@@ -54,6 +56,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
   { type: "testimonials", label: "Testimonials", category: "Content", icon: MessageSquare, description: "Customer quotes and reviews" },
   { type: "grid-gallery", label: "Grid Gallery", category: "Content", icon: GalleryIcon, description: "Multi-image photo grid gallery" },
   { type: "video-player", label: "Video Player", category: "Content", icon: Play, description: "Embedded responsive video player" },
+  { type: "table-of-contents", label: "Table of Contents", category: "Content", icon: ListTree, description: "Dynamic article headings navigation with scroll-spy and reading progress" },
   { type: "cards", label: "Cards Grid", category: "Content", icon: Layers, description: "Multi-column feature and showcase cards" },
 
   { type: "page-detail", label: "Page Detail", category: "Ghost Core", icon: FileText, description: "Dynamic page title and content wrapper" },
@@ -61,6 +64,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
   { type: "post-grid", label: "Post Grid", category: "Ghost Core", icon: ColumnsIcon, description: "Fluid grid of Ghost article cards" },
   { type: "featured-posts", label: "Featured Posts", category: "Ghost Core", icon: Grid, description: "Highlight reel of featured articles" },
   { type: "related-posts", label: "Related Posts", category: "Ghost Core", icon: Grid, description: "Recommended posts based on primary tag" },
+  { type: "pricing-table", label: "Pricing Table", category: "Ghost Core", icon: CreditCard, description: "Dynamic membership subscription tiers with Monthly/Annual toggle" },
   { type: "comments", label: "Comments", category: "Ghost Core", icon: MessageCircle, description: "Native Ghost member comments section" },
   { type: "post-navigation", label: "Post Navigation", category: "Ghost Core", icon: ArrowLeftRight, description: "Previous and Next post links" },
   { type: "author-profile", label: "Author Profile", category: "Ghost Core", icon: User, description: "Author bio, avatar, and social links" },

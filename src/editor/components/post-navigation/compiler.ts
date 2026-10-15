@@ -9,21 +9,19 @@ export const compileToHbs = (block: BuilderBlock): string => {
   const styleAttr = marginBottom ? ` style="margin-bottom: ${marginBottom};"` : "";
 
   const layoutStyle = p.layoutStyle || "split";
+  const columns = p.columns || 2;
+  const stackOnMobile = p.stackOnMobile !== false;
+
+  // Compute text-align per side based on alignment prop
+  const prevAlign = p.alignment === "right" ? "right" : p.alignment === "center" ? "center" : "left";
+  const nextAlign = p.alignment === "left" ? "left" : p.alignment === "center" ? "center" : "right";
 
   const prevImageMarkup = p.showImage
-    ? `\n      {{#if feature_image}}
-      <div class="gh-post-nav-thumb">
-        <img src="{{img_url feature_image size="xs"}}" alt="{{title}}" loading="lazy" />
-      </div>
-      {{/if}}`
+    ? `\n      {{#if feature_image}}\n      <div class="gh-post-nav-thumb">\n        <img src="{{img_url feature_image size="xs"}}" alt="{{title}}" loading="lazy" />\n      </div>\n      {{/if}}`
     : "";
 
   const nextImageMarkup = p.showImage
-    ? `\n      {{#if feature_image}}
-      <div class="gh-post-nav-thumb">
-        <img src="{{img_url feature_image size="xs"}}" alt="{{title}}" loading="lazy" />
-      </div>
-      {{/if}}`
+    ? `\n      {{#if feature_image}}\n      <div class="gh-post-nav-thumb">\n        <img src="{{img_url feature_image size="xs"}}" alt="{{title}}" loading="lazy" />\n      </div>\n      {{/if}}`
     : "";
 
   const prevExcerptMarkup = p.showExcerpt
@@ -38,39 +36,40 @@ export const compileToHbs = (block: BuilderBlock): string => {
   let layoutCss = "";
 
   if (layoutStyle === "minimal") {
+    const stackBreakpoint = stackOnMobile ? "640px" : "0px";
     layoutCss = `
   #${wrapperId} .gh-post-nav-minimal-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
-  @media (min-width: 640px) {
+  @media (min-width: ${stackBreakpoint}) {
     #${wrapperId} .gh-post-nav-minimal-container {
       flex-direction: row;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
     }
   }
   #${wrapperId} .gh-post-nav-minimal-link {
     text-decoration: none;
     color: inherit;
     flex: 1;
-    display: flex;
-    flex-direction: column;
     transition: opacity 0.2s;
   }
   #${wrapperId} .gh-post-nav-minimal-link:hover {
-    opacity: 0.8;
+    opacity: 0.75;
   }
-  #${wrapperId} .gh-post-nav-minimal-link.gh-post-nav-next {
-    text-align: right;
-    align-items: flex-end;
+  #${wrapperId} .gh-post-nav-prev {
+    text-align: ${prevAlign};
+  }
+  #${wrapperId} .gh-post-nav-next {
+    text-align: ${nextAlign};
   }
   #${wrapperId} .gh-post-nav-label {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
     font-family: var(--font-mono, monospace);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -101,13 +100,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
     {{/next_post}}
   </div>`;
   } else if (layoutStyle === "centered-arrows") {
+    const stackBreakpoint = stackOnMobile ? "640px" : "0px";
     layoutCss = `
   #${wrapperId} .gh-post-nav-centered-container {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
-  @media (min-width: 640px) {
+  @media (min-width: ${stackBreakpoint}) {
     #${wrapperId} .gh-post-nav-centered-container {
       flex-direction: row;
       justify-content: space-between;
@@ -134,7 +134,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
   #${wrapperId} .gh-post-nav-centered-link.gh-post-nav-next {
     flex-direction: row-reverse;
-    text-align: right;
+    text-align: ${nextAlign};
+  }
+  #${wrapperId} .gh-post-nav-prev {
+    text-align: ${prevAlign};
   }
   #${wrapperId} .gh-post-nav-arrow {
     display: flex;
@@ -208,15 +211,16 @@ export const compileToHbs = (block: BuilderBlock): string => {
     {{/next_post}}
   </div>`;
   } else if (layoutStyle === "image-background") {
+    const stackBreakpoint = stackOnMobile ? "768px" : "0px";
     layoutCss = `
   #${wrapperId} .gh-post-nav-image-container {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  @media (min-width: 768px) {
+  @media (min-width: ${stackBreakpoint}) {
     #${wrapperId} .gh-post-nav-image-container {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(${columns}, 1fr);
     }
   }
   #${wrapperId} .gh-post-nav-image-link {
@@ -247,10 +251,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
     position: relative;
     z-index: 10;
     color: #ffffff;
-    text-align: left;
+    text-align: ${prevAlign};
   }
   #${wrapperId} .gh-post-nav-image-link.gh-post-nav-next .gh-post-nav-image-content {
-    text-align: right;
+    text-align: ${nextAlign};
   }
   #${wrapperId} .gh-post-nav-label {
     display: inline-flex;
@@ -308,13 +312,14 @@ export const compileToHbs = (block: BuilderBlock): string => {
     {{/next_post}}
   </div>`;
   } else if (layoutStyle === "large-typography") {
+    const stackBreakpoint = stackOnMobile ? "768px" : "0px";
     layoutCss = `
   #${wrapperId} .gh-post-nav-large-container {
     display: flex;
     flex-direction: column;
     gap: 3rem;
   }
-  @media (min-width: 768px) {
+  @media (min-width: ${stackBreakpoint}) {
     #${wrapperId} .gh-post-nav-large-container {
       flex-direction: row;
       justify-content: space-between;
@@ -337,9 +342,13 @@ export const compileToHbs = (block: BuilderBlock): string => {
   html.dark #${wrapperId} .gh-post-nav-large-link:hover .gh-post-nav-label {
     color: #ffffff;
   }
-  #${wrapperId} .gh-post-nav-large-link.gh-post-nav-next {
-    text-align: right;
-    align-items: flex-end;
+  #${wrapperId} .gh-post-nav-prev {
+    text-align: ${prevAlign};
+    align-items: ${prevAlign === "right" ? "flex-end" : prevAlign === "center" ? "center" : "flex-start"};
+  }
+  #${wrapperId} .gh-post-nav-next {
+    text-align: ${nextAlign};
+    align-items: ${nextAlign === "right" ? "flex-end" : nextAlign === "center" ? "center" : "flex-start"};
   }
   #${wrapperId} .gh-post-nav-label {
     display: block;
@@ -383,7 +392,10 @@ export const compileToHbs = (block: BuilderBlock): string => {
   </div>`;
   } else {
     // split or stacked
-    const gridStyle = layoutStyle === "stacked"
+    const isStacked = layoutStyle === "stacked" || columns === 1;
+    const mobileBreakpoint = stackOnMobile ? "768px" : "0px";
+
+    const gridStyle = isStacked
       ? `
   #${wrapperId} .gh-post-nav-grid {
     display: flex;
@@ -398,12 +410,12 @@ export const compileToHbs = (block: BuilderBlock): string => {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  @media (min-width: 768px) {
+  @media (min-width: ${mobileBreakpoint}) {
     #${wrapperId} .gh-post-nav-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(${columns}, 1fr);
     }
     #${wrapperId} .gh-post-nav-next:only-child {
-      grid-column: 2;
+      grid-column: ${columns};
     }
   }`;
 
@@ -427,9 +439,21 @@ export const compileToHbs = (block: BuilderBlock): string => {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
+  #${wrapperId} .gh-post-nav-prev {
+    flex-direction: ${p.alignment === "center" ? "column" : p.alignment === "right" ? "row-reverse" : "row"};
+    text-align: ${prevAlign};
+    ${p.alignment === "center" ? "align-items: center; justify-content: center;" : ""}
+  }
   #${wrapperId} .gh-post-nav-next {
-    flex-direction: row-reverse;
-    text-align: right;
+    flex-direction: ${p.alignment === "center" ? "column" : p.alignment === "left" ? "row" : "row-reverse"};
+    text-align: ${nextAlign};
+    ${p.alignment === "center" ? "align-items: center; justify-content: center;" : ""}
+  }
+  #${wrapperId} .gh-post-nav-prev .gh-post-nav-label {
+    justify-content: ${p.alignment === "center" ? "center" : p.alignment === "right" ? "flex-end" : "flex-start"};
+  }
+  #${wrapperId} .gh-post-nav-next .gh-post-nav-label {
+    justify-content: ${p.alignment === "center" ? "center" : p.alignment === "left" ? "flex-start" : "flex-end"};
   }
   #${wrapperId} .gh-post-nav-thumb {
     width: 3.5rem;
@@ -526,7 +550,7 @@ export const compileToHbs = (block: BuilderBlock): string => {
   }
 ${layoutCss}
 </style>
-<nav id="${wrapperId}" class="gh-post-nav" data-layout="${layoutStyle}"${styleAttr}>
+<nav id="${wrapperId}" class="gh-post-nav" data-layout="${layoutStyle}" data-columns="${columns}"${styleAttr}>
 ${layoutMarkup}
 </nav>`;
 };

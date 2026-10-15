@@ -3,6 +3,7 @@ import { BuilderBlock } from "@/types/theme";
 import { resolveCommentsProps } from "./schema";
 import { MessageSquare } from "lucide-react";
 import { useCanvasDarkMode } from "../shared/useCanvasDarkMode";
+import { useEditorStore } from "@/store/editorStore";
 
 export const CanvasElement = ({
   block,
@@ -15,15 +16,46 @@ export const CanvasElement = ({
 }) => {
   useCanvasDarkMode();
   const p = resolveCommentsProps(block.props);
+  const deviceMode = useEditorStore((s) => s.deviceMode);
+  const isMobile = deviceMode === "mobile";
+
+  const alignStyle: React.CSSProperties =
+    p.alignment === "left"
+      ? { marginLeft: 0, marginRight: "auto" }
+      : p.alignment === "right"
+      ? { marginLeft: "auto", marginRight: 0 }
+      : { marginLeft: "auto", marginRight: "auto" };
+
+  const headerAlignClass =
+    p.alignment === "left"
+      ? "justify-start text-left"
+      : p.alignment === "right"
+      ? "justify-end text-right"
+      : "justify-center text-center";
 
   return (
-    <div className="w-full max-w-2xl mx-auto py-8 px-4">
+    <div
+      style={{
+        maxWidth: isMobile ? "100%" : p.maxWidth,
+        width: "100%",
+        ...alignStyle,
+      }}
+      className={`w-full ${
+        isMobile && p.responsivePadding ? "py-4 px-2.5" : "py-8 px-4"
+      } transition-all duration-200`}
+    >
       {/* Header */}
-      <div className="flex items-center gap-2 mb-6 border-b border-brand-hairline dark:border-neutral-800 pb-3">
-        <MessageSquare size={18} className="text-brand-ink dark:text-white" />
+      <div
+        className={`flex items-center gap-2 mb-6 border-b border-brand-hairline dark:border-neutral-800 pb-3 ${headerAlignClass}`}
+      >
+        <MessageSquare size={18} className="text-brand-ink dark:text-white shrink-0" />
         <h3 className="text-lg font-bold text-brand-ink dark:text-white">
           {p.heading}
-          {p.showCount && <span className="text-brand-mute dark:text-neutral-400 font-normal ml-2">(3)</span>}
+          {p.showCount && (
+            <span className="text-brand-mute dark:text-neutral-400 font-normal ml-2">
+              (3)
+            </span>
+          )}
         </h3>
       </div>
 
@@ -55,8 +87,12 @@ export const CanvasElement = ({
           </div>
           <div className="flex-1 space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-brand-ink dark:text-white">Alex Rivera</span>
-              <span className="text-[10px] text-brand-mute dark:text-neutral-400">· Just now</span>
+              <span className="text-xs font-semibold text-brand-ink dark:text-white">
+                Alex Rivera
+              </span>
+              <span className="text-[10px] text-brand-mute dark:text-neutral-400">
+                · Just now
+              </span>
             </div>
             <p className="text-xs text-brand-body dark:text-neutral-300 leading-relaxed">
               Great insights! Really excited to see how this theme evolves.
@@ -65,7 +101,9 @@ export const CanvasElement = ({
               <span className="flex items-center gap-1 hover:text-brand-ink dark:hover:text-white cursor-pointer">
                 👍 0
               </span>
-              <span className="hover:text-brand-ink dark:hover:text-white cursor-pointer">Reply</span>
+              <span className="hover:text-brand-ink dark:hover:text-white cursor-pointer">
+                Reply
+              </span>
             </div>
           </div>
         </div>
@@ -77,8 +115,12 @@ export const CanvasElement = ({
           </div>
           <div className="flex-1 space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-brand-ink dark:text-white">Alex Rivera</span>
-              <span className="text-[10px] text-brand-mute dark:text-neutral-400">· 2 hours ago</span>
+              <span className="text-xs font-semibold text-brand-ink dark:text-white">
+                Alex Rivera
+              </span>
+              <span className="text-[10px] text-brand-mute dark:text-neutral-400">
+                · 2 hours ago
+              </span>
             </div>
             <p className="text-xs text-brand-body dark:text-neutral-300 leading-relaxed">
               Clean and beautifully responsive layout. Outstanding craftsmanship.
@@ -87,7 +129,9 @@ export const CanvasElement = ({
               <span className="flex items-center gap-1 hover:text-brand-ink dark:hover:text-white cursor-pointer">
                 👍 3
               </span>
-              <span className="hover:text-brand-ink dark:hover:text-white cursor-pointer">Reply</span>
+              <span className="hover:text-brand-ink dark:hover:text-white cursor-pointer">
+                Reply
+              </span>
             </div>
           </div>
         </div>

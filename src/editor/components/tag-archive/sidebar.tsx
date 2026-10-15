@@ -2,6 +2,11 @@ import React from "react";
 import { BuilderBlock } from "@/types/theme";
 import { resolveTagArchiveProps, TagArchiveProps } from "./schema";
 import { Sparkles } from "lucide-react";
+import {
+  AlignmentControl,
+  MaxWidthControl,
+  ColumnsControl,
+} from "../shared/GhostCoreLayoutControls";
 
 export const SidebarElement = ({
   block,
@@ -40,6 +45,34 @@ export const SidebarElement = ({
           <option value="banner">Tag Page Banner (tag.hbs)</option>
           <option value="cloud">Topics Cloud Grid (all tags)</option>
         </select>
+      </div>
+
+      {/* Layout & Alignment */}
+      <div className="flex flex-col gap-3 border-b border-brand-hairline pb-4">
+        <span className="font-sans font-bold text-xs uppercase tracking-wider text-brand-ink dark:text-white">
+          Layout & Alignment
+        </span>
+
+        <AlignmentControl
+          label={p.layoutStyle === "cloud" ? "Section Heading Alignment" : "Banner Alignment"}
+          alignment={p.alignment}
+          onChange={(align) => updateProp("alignment", align)}
+        />
+
+        <MaxWidthControl
+          label="Container Max Width"
+          maxWidth={p.maxWidth}
+          onChange={(val) => updateProp("maxWidth", val)}
+        />
+
+        {p.layoutStyle === "cloud" && (
+          <ColumnsControl
+            label="Tag Grid Columns"
+            columns={p.columns}
+            options={[2, 3, 4, 6]}
+            onChange={(cols) => updateProp("columns", cols as 2 | 3 | 4 | 6)}
+          />
+        )}
       </div>
 
       {/* Title */}

@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import { ThemeDocument, BuilderBlock, ThemePages, ThemeSettings } from "../types/theme";
+import { isBlockOrDescendant, isHeaderOrFooterBlock } from "../editor/utils/blockTraversal";
+
+export { isHeaderOrFooterBlock };
 
 export function generateId(prefix: string = "block"): string {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
@@ -508,22 +511,6 @@ const triggerAutosave = (get: () => EditorState) => {
   autosaveTimeout = setTimeout(() => {
     get().saveTheme();
   }, 400);
-};
-
-/**
- * Helper to check whether a block or any of its descendants is a header or footer.
- */
-export const isHeaderOrFooterBlock = (
-  blockId: string,
-  blocks: Record<string, BuilderBlock>
-): boolean => {
-  const block = blocks[blockId];
-  if (!block) return false;
-  if (block.type === "header" || block.type === "footer") return true;
-  if (block.childrenIds && block.childrenIds.length > 0) {
-    return block.childrenIds.some((cid) => isHeaderOrFooterBlock(cid, blocks));
-  }
-  return false;
 };
 
 /**
@@ -1401,6 +1388,41 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   moveBlock: (activeId, overId) => set((state) => {
     if (activeId === overId) return {};
+
+    const currentBlocks = state.document.blocks;
+    let targetParentId: string | null = null;
+
+    if (overId.startsWith("drop-slot-")) {
+      const slotParts = overId.replace("drop-slot-", "").split("-");
+      if (slotParts.length > 1) {
+        targetParentId = slotParts.slice(0, -1).join("-");
+      }
+    } else {
+      const targetBlock = currentBlocks[overId];
+      const isTargetLayoutContainer =
+        targetBlock &&
+        (targetBlock.type === "section" || targetBlock.type === "container" || targetBlock.type === "columns") &&
+        !(currentBlocks[activeId]?.type === "section" && targetBlock.type === "section");
+
+      if (isTargetLayoutContainer) {
+        targetParentId = overId;
+      } else {
+        for (const parent of Object.values(currentBlocks)) {
+          if (parent.childrenIds?.includes(overId)) {
+            targetParentId = parent.id;
+            break;
+          }
+        }
+      }
+    }
+
+    if (
+      targetParentId &&
+      isBlockOrDescendant(activeId, targetParentId, currentBlocks)
+    ) {
+      return {};
+    }
+
     const historyUpdate = saveToHistory(state);
 
     const newBlocks = { ...state.document.blocks };
