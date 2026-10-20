@@ -293,6 +293,31 @@ export const SidebarElement = ({ block, onChangeProps, onChangeStyles }: {
                   className="w-full px-2 py-1.5 text-[12px] border border-gray-200 rounded focus:border-blue-400 focus:outline-none"
                   placeholder="Subscribe"
                 />
+
+                <div className="mt-2.5 flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Click Destination</label>
+                  <select
+                    value={g.subscribeAction ?? "membership-page"}
+                    onChange={(e) => updateCategory("general", "subscribeAction", e.target.value)}
+                    className="w-full px-2 py-1 text-[11px] border border-gray-200 rounded bg-white focus:border-blue-400 focus:outline-none"
+                  >
+                    <option value="membership-page">Custom Pricing Page (/membership/)</option>
+                    <option value="portal">Direct Ghost Portal Modal</option>
+                  </select>
+                </div>
+
+                {(g.subscribeAction ?? "membership-page") === "membership-page" && (
+                  <div className="mt-2 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Page URL</label>
+                    <input
+                      type="text"
+                      value={g.subscribeUrl ?? "/membership/"}
+                      onChange={(e) => updateCategory("general", "subscribeUrl", e.target.value)}
+                      placeholder="/membership/"
+                      className="w-full px-2 py-1 text-[11px] border border-gray-200 rounded focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

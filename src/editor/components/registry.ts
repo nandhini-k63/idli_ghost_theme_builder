@@ -1,3 +1,7 @@
+import * as pricingTable from "./pricing-table/schema";
+import * as pricingTableCanvas from "./pricing-table/canvas";
+import * as pricingTableSidebar from "./pricing-table/sidebar";
+import * as pricingTableCompiler from "./pricing-table/compiler";
 import { ComponentDefinition } from "./types";
 import * as heading from "./heading/schema";
 import * as headingCanvas from "./heading/canvas";
@@ -198,4 +202,5 @@ export const componentRegistry: Record<string, ComponentDefinition> = {
   "related-posts": { type: "related-posts", ...relatedPosts, ...relatedPostsCanvas, ...relatedPostsSidebar, ...relatedPostsCompiler },
   "post-navigation": { type: "post-navigation", ...postNavigation, ...postNavigationCanvas, ...postNavigationSidebar, ...postNavigationCompiler },
   cards: { type: "cards", ...cards, ...cardsCanvas, ...cardsSidebar, ...cardsCompiler },
+  "pricing-table": { type: "pricing-table", ...pricingTable, ...pricingTableCanvas, ...pricingTableSidebar, ...pricingTableCompiler },
 };

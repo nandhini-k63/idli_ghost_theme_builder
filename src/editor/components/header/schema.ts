@@ -18,6 +18,8 @@ export interface HeaderProps {
     signInText?: string;
     showSubscribe: boolean;
     subscribeText?: string;
+    subscribeAction?: "portal" | "membership-page";
+    subscribeUrl?: string;
     memberPreviewState?: "visitor" | "member";
     sticky: boolean;
     dropdownPrefix?: string;
@@ -58,6 +60,8 @@ export const defaultProps: HeaderProps = {
     signInText: "Sign in",
     showSubscribe: true,
     subscribeText: "Subscribe",
+    subscribeAction: "membership-page",
+    subscribeUrl: "/membership/",
     memberPreviewState: "visitor",
     sticky: false,
   },

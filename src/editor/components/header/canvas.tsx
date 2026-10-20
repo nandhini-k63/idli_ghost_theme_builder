@@ -252,7 +252,12 @@ export const CanvasElement = ({ block }: {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setActiveModal("Ghost Portal Subscribe simulation active.");
+            const action = general.subscribeAction ?? "membership-page";
+            if (action === "portal") {
+              setActiveModal("Ghost Portal Subscribe simulation active.");
+            } else {
+              setActiveModal("Navigating to custom membership page: " + (general.subscribeUrl || "/membership/"));
+            }
           }}
           className={vertical
             ? "gh-head-btn gh-btn w-full max-w-[280px] py-2.5 rounded-full text-[1.0625rem] font-semibold shadow-sm transition-all whitespace-nowrap opacity-90 hover:opacity-100 text-center"

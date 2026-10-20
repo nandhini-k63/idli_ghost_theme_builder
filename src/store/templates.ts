@@ -320,4 +320,54 @@ export const PAGE_TEMPLATES: PageTemplate[] = [
       };
     },
   },
+  {
+    id: "membership-pricing",
+    name: "Membership & Pricing Plans",
+    description: "Dedicated subscription plan selection page with Ghost-native membership tiers and FAQ.",
+    generateBlocks: () => {
+      const pricingId = generateId("pricing-table");
+      const faqId = generateId("faq");
+
+      return {
+        sections: [pricingId, faqId],
+        blocks: {
+          [pricingId]: {
+            id: pricingId,
+            type: "pricing-table",
+            props: {
+              title: "Choose Your Membership",
+              subtitle: "Unlock premium articles, deep dives, and member-only discussions.",
+              columns: 3,
+              cadenceMode: "both",
+              cardStyle: "bordered",
+              buttonVariant: "solid",
+              showDescriptions: true,
+              showBenefits: true,
+            },
+            styles: {
+              paddingTop: "64px",
+              paddingBottom: "64px",
+            },
+          },
+          [faqId]: {
+            id: faqId,
+            type: "faq",
+            props: {
+              general: {
+                heading: "Frequently Asked Questions",
+                layoutStyle: "accordion",
+                allowMultipleOpen: false,
+                itemCornerStyle: "rounded",
+              },
+            },
+            styles: {
+              paddingTop: "48px",
+              paddingBottom: "96px",
+              backgroundColor: "var(--color-canvas-soft, #fafafa)",
+            },
+          },
+        },
+      };
+    },
+  },
 ];

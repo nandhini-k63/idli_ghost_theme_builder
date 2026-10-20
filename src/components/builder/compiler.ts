@@ -94,7 +94,7 @@ function getInlineStyles(block: BuilderBlock): string {
   const glassEnabled = !!glassBlur && glassBlur !== "none" && glassBlur !== "0px";
 
   const selfRendering = [
-    "header", "footer", "hero", "newsletter", "post-grid", "testimonials",
+    "header", "footer", "hero", "newsletter", "post-grid", "testimonials", "pricing-table",
     "faq", "grid-gallery", "logo-cloud", "related-posts", "stats", "team",
     "cards", "container", "columns", "section"
   ].includes(block.type);
@@ -274,8 +274,17 @@ export function compilePageToHbs(pageName: string, doc: ThemeDocument): string {
   if (!page) return "";
 
   const isPageContext = pageName === "page" || pageName.startsWith("custom-");
+  // pricing-table blocks are reserved for the dedicated /membership/ page.
+  // Exclude them from all other pages so they do not appear on the homepage
+  // or any other page automatically.
+  const isMembershipPage = pageName === "membership";
   const mainContent = page.sections
     .filter((sectionId) => !isHeaderOrFooterBlock(sectionId, doc.blocks))
+    .filter((sectionId) => {
+      if (isMembershipPage) return true;
+      const block = doc.blocks[sectionId];
+      return block?.type !== "pricing-table";
+    })
     .map((sectionId) => compileBlockToHbs(sectionId, doc.blocks, isPageContext))
     .join("\n");
 
@@ -2082,6 +2091,25 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
     }
   });
 
+  // 3b. Auto-generate membership.hbs from pricing-table blocks.
+  // Ghost resolves /membership/ to membership.hbs in the active theme,
+  // so we always emit this file when a pricing-table block is present,
+  // regardless of which page it was dragged onto. This guarantees
+  // that /membership/ never returns 404 after theme export and upload.
+  if (!files["membership.hbs"]) {
+    const pricingBlocks = Object.values(doc.blocks).filter(
+      (b) => b.type === "pricing-table"
+    );
+    if (pricingBlocks.length > 0) {
+      const pricingContent = pricingBlocks
+        .map((b) => compileBlockToHbs(b.id, doc.blocks, false))
+        .join("\n");
+      // membership.hbs uses the default.hbs layout wrapper which already
+      // injects the {{> "header"}} and {{> "footer"}} partials.
+      files["membership.hbs"] = `{{!< default}}\n\n${pricingContent}\n`;
+    }
+  }
+
   // 4. Generate navigation partial for Ghost compatibility (supporting both primary and secondary navigation)
   files["partials/navigation.hbs"] = `{{#if isSecondary}}
 <ul class="nav nav-secondary" role="menu">
@@ -2113,6 +2141,40 @@ export function generateThemeFiles(doc: ThemeDocument): Record<string, string> {
 <section class="gh-content{{#if width}} gh-content-{{width}}{{/if}}">
     {{content}}
 </section>
+`;
+
+  // 6b. Generate content-cta.hbs partial (custom theme-rendered subscriber callout)
+  files["partials/content-cta.hbs"] = `{{{html}}}
+<aside class="gh-post-upgrade-cta" style="margin: 3.5rem 0; padding: 2.5rem 2rem; text-align: center; background: var(--color-canvas-soft, #f8fafc); border: 1px solid rgba(0,0,0,0.08); border-radius: var(--radius-lg, 12px);">
+  <div class="gh-post-upgrade-cta-content" style="max-width: 600px; margin: 0 auto;">
+    {{#has visibility="paid"}}
+      <h2 style="font-family: var(--gh-font-heading, var(--font-heading)); font-size: 1.75rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--color-fg, #111827);">This post is for paying subscribers only</h2>
+    {{/has}}
+    {{#has visibility="members"}}
+      <h2 style="font-family: var(--gh-font-heading, var(--font-heading)); font-size: 1.75rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--color-fg, #111827);">This post is for subscribers only</h2>
+    {{/has}}
+    {{#has visibility="tiers"}}
+      <h2 style="font-family: var(--gh-font-heading, var(--font-heading)); font-size: 1.75rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--color-fg, #111827);">This post is for subscribers on {{tiers}} only</h2>
+    {{/has}}
+    <p style="font-family: var(--gh-font-body, var(--font-body)); font-size: 1rem; color: var(--color-muted, #64748b); line-height: 1.6; margin: 0 0 1.75rem 0;">
+      {{#if @member}}
+        Upgrade your account to unlock this post and all other subscriber-only content.
+      {{else}}
+        Subscribe to unlock this post and get full access to our publication archive and member perks.
+      {{/if}}
+    </p>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+      <a class="gh-btn" href="/membership/" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 2rem; font-size: 0.95rem; font-weight: 600; border-radius: var(--radius-pill, 9999px); background-color: var(--ghost-accent-color, var(--color-accent, #111827)); color: #ffffff; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: opacity 0.15s;">
+        {{#if @member}}View Upgrade Plans{{else}}View Membership Plans{{/if}}
+      </a>
+      {{#unless @member}}
+        <p style="margin: 0; font-size: 0.85rem; color: var(--color-muted, #64748b);">
+          Already have an account? <a href="#/portal/signin" data-portal="signin" style="color: var(--ghost-accent-color, var(--color-accent, #111827)); font-weight: 600; text-decoration: underline;">Sign in</a>
+        </p>
+      {{/unless}}
+    </div>
+  </div>
+</aside>
 `;
 
   // 7. Generate post-card.hbs

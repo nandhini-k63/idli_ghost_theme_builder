@@ -24,6 +24,7 @@ import {
   FileText,
   ArrowLeftRight,
   Layers,
+  CreditCard,
 } from "lucide-react";
 
 export interface BlockTemplate {
@@ -47,6 +48,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
   { type: "image", label: "Image Block", category: "Content", icon: ImageIcon, description: "Responsive image with aspect ratio" },
   { type: "hero", label: "Hero Component", category: "Content", icon: Sparkles, description: "Hero showcase with heading and CTA" },
   { type: "newsletter", label: "Newsletter", category: "Content", icon: Mail, description: "Ghost member subscription signup box" },
+  { type: "pricing-table", label: "Pricing Table", category: "Content", icon: CreditCard, description: "Ghost native membership tiers & Portal checkout table" },
   { type: "team", label: "Team", category: "Content", icon: Users, description: "Team member cards grid" },
   { type: "faq", label: "FAQ", category: "Content", icon: HelpCircle, description: "Collapsible accordion questions and answers" },
   { type: "logo-cloud", label: "Logo Cloud", category: "Content", icon: Cloud, description: "Sponsors or partner brand logos" },
